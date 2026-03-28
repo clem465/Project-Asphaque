@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dr0jm6fnwyjnt"]
 
 [ext_resource type="Texture2D" uid="uid://c06qbteqv8563" path="res://assets/npc/knight/_Idle.png" id="2_cs0kb"]
+[ext_resource type="PackedScene" uid="uid://dnm7kishggdbs" path="res://helpers/actionable_teleport.tscn" id="3_gwci6"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tveaq"]
 atlas = ExtResource("2_cs0kb")
@@ -81,16 +82,28 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p4nnn"]
-size = Vector2(19, 38)
+size = Vector2(16, 30)
 
-[node name="npc1" type="Node2D" unique_id=1189262726]
+[sub_resource type="CircleShape2D" id="CircleShape2D_th0st"]
+radius = 56.0357
+
+[node name="npc1" type="CharacterBody2D" unique_id=2039283005]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1677987511]
-position = Vector2(16, 20)
+z_index = 3
+position = Vector2(13, 20)
+scale = Vector2(0.8, 0.8)
 sprite_frames = SubResource("SpriteFrames_025l1")
 autoplay = "default"
 frame_progress = 0.9244276
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1824837244]
-position = Vector2(10.5, 21)
+position = Vector2(9, 21)
 shape = SubResource("RectangleShape2D_p4nnn")
+
+[node name="Actionable_teleport" parent="." unique_id=130623042 instance=ExtResource("3_gwci6")]
+position = Vector2(-2, -1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Actionable_teleport" unique_id=1177984130]
+position = Vector2(12, 21)
+shape = SubResource("CircleShape2D_th0st")

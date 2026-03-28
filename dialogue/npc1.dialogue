@@ -1,5 +1,12 @@
 ~ start
 
 Théo: Salam roya !
+Théo: Tu veux entrer dans le donjon ?
 
+- Oui => go_dungeon
+- Non => END
+
+~ go_dungeon
+
+Théo: Bonne chance !
 => END

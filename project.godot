@@ -17,8 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Music="*uid://bvstecdyjgao7"
 DialogueManager="*uid://c3rodes2l3gxb"
+Music="*uid://bvstecdyjgao7"
 
 [dialogue_manager]
 

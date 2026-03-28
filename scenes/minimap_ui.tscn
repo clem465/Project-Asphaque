@@ -1,0 +1,385 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/minimap_ui.gd" id="1_ui"]
+[ext_resource type="Script" path="res://scripts/window_drag.gd" id="2_drag"]
+[ext_resource type="Script" path="res://scripts/map_pan_zoom.gd" id="3_pan"]
+[ext_resource type="Script" path="res://scripts/window_resize.gd" id="4_resize"]
+
+[node name="MinimapUI" type="CanvasLayer" node_paths=PackedStringArray("toggle_button", "minimap_window", "map_viewport", "map_camera", "inventory_button", "inventory_window", "stats_button", "stats_window", "actions_button", "actions_window")]
+script = ExtResource("1_ui")
+toggle_button = NodePath("ToggleButton")
+minimap_window = NodePath("MinimapWindow")
+map_viewport = NodePath("MinimapWindow/MapContainer/MapViewport")
+map_camera = NodePath("MinimapWindow/MapContainer/MapViewport/MapCamera")
+inventory_button = NodePath("InventoryButton")
+inventory_window = NodePath("InventoryWindow")
+stats_button = NodePath("StatsButton")
+stats_window = NodePath("StatsWindow")
+actions_button = NodePath("ActionsButton")
+actions_window = NodePath("ActionsWindow")
+
+[node name="ToggleButton" type="Button" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -70.0
+offset_right = -20.0
+offset_bottom = -20.0
+text = "Carte"
+
+[node name="InventoryButton" type="Button" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -280.0
+offset_top = -70.0
+offset_right = -160.0
+offset_bottom = -20.0
+text = "Inventaire"
+
+[node name="StatsButton" type="Button" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -70.0
+offset_right = -300.0
+offset_bottom = -20.0
+text = "Stats"
+
+[node name="ActionsButton" type="Button" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -560.0
+offset_top = -70.0
+offset_right = -440.0
+offset_bottom = -20.0
+text = "Actions"
+
+[node name="MinimapWindow" type="Panel" parent="."]
+visible = false
+offset_left = 300.0
+offset_top = 100.0
+offset_right = 700.0
+offset_bottom = 500.0
+mouse_filter = 0
+
+[node name="TitleBar" type="ColorRect" parent="MinimapWindow" node_paths=PackedStringArray("target_window")]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 30.0
+grow_horizontal = 2
+color = Color(0.2, 0.2, 0.2, 1)
+mouse_filter = 0
+script = ExtResource("2_drag")
+target_window = NodePath("..")
+
+[node name="Header" type="HBoxContainer" parent="MinimapWindow/TitleBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_right = -6.0
+
+[node name="OpacitySlider" type="HSlider" parent="MinimapWindow/TitleBar/Header"]
+custom_minimum_size = Vector2(80, 0)
+size_flags_horizontal = 3
+min_value = 0.2
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="TitleLabel" type="Label" parent="MinimapWindow/TitleBar/Header"]
+size_flags_horizontal = 3
+text = "Minimap"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="MinimapWindow/TitleBar/Header"]
+custom_minimum_size = Vector2(24, 0)
+text = "x"
+
+[node name="MapContainer" type="SubViewportContainer" parent="MinimapWindow" node_paths=PackedStringArray("map_camera")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+mouse_filter = 0
+script = ExtResource("3_pan")
+map_camera = NodePath("MapViewport/MapCamera")
+
+[node name="ResizeHandle" type="ColorRect" parent="MinimapWindow" node_paths=PackedStringArray("target_window")]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 0.0
+offset_bottom = 0.0
+color = Color(0.8, 0.8, 0.8, 0.8)
+mouse_filter = 0
+script = ExtResource("4_resize")
+target_window = NodePath("..")
+
+[node name="MapViewport" type="SubViewport" parent="MinimapWindow/MapContainer"]
+handle_input_locally = false
+size = Vector2i(400, 370)
+
+[node name="MapCamera" type="Camera2D" parent="MinimapWindow/MapContainer/MapViewport"]
+zoom = Vector2(0.8, 0.8)
+
+[node name="InventoryWindow" type="Panel" parent="."]
+visible = false
+offset_left = 80.0
+offset_top = 120.0
+offset_right = 420.0
+offset_bottom = 420.0
+mouse_filter = 0
+
+[node name="TitleBar" type="ColorRect" parent="InventoryWindow" node_paths=PackedStringArray("target_window")]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 30.0
+grow_horizontal = 2
+color = Color(0.2, 0.2, 0.2, 1)
+mouse_filter = 0
+script = ExtResource("2_drag")
+target_window = NodePath("..")
+
+[node name="Header" type="HBoxContainer" parent="InventoryWindow/TitleBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_right = -6.0
+
+[node name="OpacitySlider" type="HSlider" parent="InventoryWindow/TitleBar/Header"]
+custom_minimum_size = Vector2(80, 0)
+size_flags_horizontal = 3
+min_value = 0.2
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="TitleLabel" type="Label" parent="InventoryWindow/TitleBar/Header"]
+size_flags_horizontal = 3
+text = "Inventaire"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="InventoryWindow/TitleBar/Header"]
+custom_minimum_size = Vector2(24, 0)
+text = "x"
+
+[node name="Content" type="PanelContainer" parent="InventoryWindow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+
+[node name="ResizeHandle" type="ColorRect" parent="InventoryWindow" node_paths=PackedStringArray("target_window")]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 0.0
+offset_bottom = 0.0
+color = Color(0.8, 0.8, 0.8, 0.8)
+mouse_filter = 0
+script = ExtResource("4_resize")
+target_window = NodePath("..")
+
+[node name="InventoryPlaceholder" type="Label" parent="InventoryWindow/Content"]
+text = "(Inventaire vide)"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatsWindow" type="Panel" parent="."]
+visible = false
+offset_left = 460.0
+offset_top = 140.0
+offset_right = 760.0
+offset_bottom = 420.0
+mouse_filter = 0
+
+[node name="TitleBar" type="ColorRect" parent="StatsWindow" node_paths=PackedStringArray("target_window")]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 30.0
+grow_horizontal = 2
+color = Color(0.2, 0.2, 0.2, 1)
+mouse_filter = 0
+script = ExtResource("2_drag")
+target_window = NodePath("..")
+
+[node name="Header" type="HBoxContainer" parent="StatsWindow/TitleBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_right = -6.0
+
+[node name="OpacitySlider" type="HSlider" parent="StatsWindow/TitleBar/Header"]
+custom_minimum_size = Vector2(80, 0)
+size_flags_horizontal = 3
+min_value = 0.2
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="TitleLabel" type="Label" parent="StatsWindow/TitleBar/Header"]
+size_flags_horizontal = 3
+text = "Stats"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="StatsWindow/TitleBar/Header"]
+custom_minimum_size = Vector2(24, 0)
+text = "x"
+
+[node name="Content" type="PanelContainer" parent="StatsWindow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+
+[node name="ResizeHandle" type="ColorRect" parent="StatsWindow" node_paths=PackedStringArray("target_window")]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 0.0
+offset_bottom = 0.0
+color = Color(0.8, 0.8, 0.8, 0.8)
+mouse_filter = 0
+script = ExtResource("4_resize")
+target_window = NodePath("..")
+
+[node name="StatsVBox" type="VBoxContainer" parent="StatsWindow/Content"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+
+[node name="HpLabel" type="Label" parent="StatsWindow/Content/StatsVBox"]
+text = "HP: 100"
+
+[node name="AtkLabel" type="Label" parent="StatsWindow/Content/StatsVBox"]
+text = "ATK: 12"
+
+[node name="DefLabel" type="Label" parent="StatsWindow/Content/StatsVBox"]
+text = "DEF: 8"
+
+[node name="ActionsWindow" type="Panel" parent="."]
+visible = false
+offset_left = 120.0
+offset_top = 460.0
+offset_right = 420.0
+offset_bottom = 660.0
+mouse_filter = 0
+
+[node name="TitleBar" type="ColorRect" parent="ActionsWindow" node_paths=PackedStringArray("target_window")]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 30.0
+grow_horizontal = 2
+color = Color(0.2, 0.2, 0.2, 1)
+mouse_filter = 0
+script = ExtResource("2_drag")
+target_window = NodePath("..")
+
+[node name="Header" type="HBoxContainer" parent="ActionsWindow/TitleBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_right = -6.0
+
+[node name="OpacitySlider" type="HSlider" parent="ActionsWindow/TitleBar/Header"]
+custom_minimum_size = Vector2(80, 0)
+size_flags_horizontal = 3
+min_value = 0.2
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="TitleLabel" type="Label" parent="ActionsWindow/TitleBar/Header"]
+size_flags_horizontal = 3
+text = "Actions"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="ActionsWindow/TitleBar/Header"]
+custom_minimum_size = Vector2(24, 0)
+text = "x"
+
+[node name="Content" type="PanelContainer" parent="ActionsWindow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+
+[node name="ResizeHandle" type="ColorRect" parent="ActionsWindow" node_paths=PackedStringArray("target_window")]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 0.0
+offset_bottom = 0.0
+color = Color(0.8, 0.8, 0.8, 0.8)
+mouse_filter = 0
+script = ExtResource("4_resize")
+target_window = NodePath("..")
+
+[node name="ActionsVBox" type="VBoxContainer" parent="ActionsWindow/Content"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+
+[node name="Action1" type="Button" parent="ActionsWindow/Content/ActionsVBox"]
+text = "Action 1"
+
+[node name="Action2" type="Button" parent="ActionsWindow/Content/ActionsVBox"]
+text = "Action 2"
+
+[node name="Action3" type="Button" parent="ActionsWindow/Content/ActionsVBox"]
+text = "Action 3"

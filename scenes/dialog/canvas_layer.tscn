@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://rk60gjtjslyt"]
+
+[ext_resource type="Script" uid="uid://bqptw7sl13qdu" path="res://scripts/DialogueManager.gd" id="1_s6oxb"]
+
+[node name="CanvasLayer" type="CanvasLayer" unique_id=75778875]
+script = ExtResource("1_s6oxb")
+
+[node name="Panel" type="Panel" parent="." unique_id=915828696]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DialogLabel" type="Label" parent="Panel" unique_id=366352496]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
