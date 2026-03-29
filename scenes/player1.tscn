@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://deje0qbjyjjj7"]
 
 [ext_resource type="Texture2D" uid="uid://c5lvhht2v8ov0" path="res://assets/hero/ATTACK 1/attack1_down.png" id="1_16ml7"]
+[ext_resource type="Script" uid="uid://bhjhpfucowto3" path="res://scripts/player/player1.gd" id="1_mod63"]
 [ext_resource type="Texture2D" uid="uid://c3ftr5g54hr18" path="res://assets/hero/IDLE/idle_down.png" id="2_euhpk"]
 [ext_resource type="Texture2D" uid="uid://7t84tbgc8dyi" path="res://assets/hero/ATTACK 1/attack1_left.png" id="2_mod63"]
 [ext_resource type="Texture2D" uid="uid://bxqsbngrbdf4j" path="res://assets/hero/ATTACK 1/attack1_right.png" id="3_tvatu"]
@@ -12,64 +13,6 @@
 [ext_resource type="Texture2D" uid="uid://cylr3jcsckqsq" path="res://assets/hero/RUN/run_left.png" id="7_qrjn2"]
 [ext_resource type="Texture2D" uid="uid://c2ucqekujildg" path="res://assets/hero/RUN/run_right.png" id="8_tsh6u"]
 [ext_resource type="Texture2D" uid="uid://c5j76eyu4x18s" path="res://assets/hero/RUN/run_up.png" id="9_do31k"]
-
-[sub_resource type="GDScript" id="GDScript_sd87i"]
-script/source = "extends CharacterBody2D
-
-@export var speed: float = 80.0
-@onready var actionable_finder: Area2D = $Direction/ActionableFinder
-
-var input_vector := Vector2.ZERO
-var last_direction := \"down\"  # direction par défaut
-
-
-func _process(delta: float) -> void:
-	_get_input()
-	_update_animation()
-	
-func _unhandled_input(event: InputEvent) -> void:
-	if Input.is_action_just_pressed(\"interact\"):
-		var actionables = actionable_finder.get_overlapping_areas()
-		if actionables.size() > 0:
-			actionables[0].action()
-			return
-
-func _physics_process(delta: float) -> void:
-	velocity = input_vector * speed
-	move_and_slide()
-
-func _get_input() -> void:
-	input_vector = Vector2.ZERO	
-	input_vector.x = Input.get_action_strength(\"move_right\") - Input.get_action_strength(\"move_left\")
-	input_vector.y = Input.get_action_strength(\"move_down\") - Input.get_action_strength(\"move_up\")
-
-	if input_vector.length() > 1:
-		input_vector = input_vector.normalized()
-	
-
-func _update_animation() -> void:
-	var anim = $AnimatedSprite2D
-
-	if input_vector == Vector2.ZERO: 
-		anim.play(\"idle_\" + last_direction)
-		return
-
-	# Détection de direction
-	if abs(input_vector.x) > abs(input_vector.y):
-		if input_vector.x > 0:
-			last_direction = \"right\"
-			anim.play(\"run_right\")
-		else:
-			last_direction = \"left\"
-			anim.play(\"run_left\")
-	else:
-		if input_vector.y > 0:
-			last_direction = \"down\"
-			anim.play(\"run_down\")
-		else:
-			last_direction = \"up\"
-			anim.play(\"run_up\")
-"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tsh6u"]
 atlas = ExtResource("1_16ml7")
@@ -812,36 +755,50 @@ size = Vector2(15.841584, 29.881187)
 [sub_resource type="CircleShape2D" id="CircleShape2D_ur7pv"]
 radius = 23.762377
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_vul4d"]
-size = Vector2(27.821781, 29.702972)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mod63"]
 
-[node name="Player1" type="CharacterBody2D" unique_id=899918847]
+[node name="Player1" type="CharacterBody2D" unique_id=899918847 groups=["player"]]
+z_index = 2
 scale = Vector2(0.505, 0.505)
-collision_mask = 2
-script = SubResource("GDScript_sd87i")
+collision_layer = 2
+collision_mask = 9
+script = ExtResource("1_mod63")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=218171934]
 sprite_frames = SubResource("SpriteFrames_y4r1p")
-animation = &"attack_up"
+animation = &"attack_right"
 autoplay = "idle_down"
-frame_progress = 0.052688994
+frame = 1
+frame_progress = 0.86433995
+metadata/_edit_lock_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=321125183]
 position = Vector2(2.36058e-07, 3.059406)
 shape = SubResource("RectangleShape2D_d2wvv")
+metadata/_edit_lock_ = true
 
 [node name="Direction" type="Marker2D" parent="." unique_id=341479417]
 
 [node name="ActionableFinder" type="Area2D" parent="Direction" unique_id=2114118353]
 collision_layer = 0
 collision_mask = 16
+metadata/_edit_lock_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Direction/ActionableFinder" unique_id=671173310]
 position = Vector2(0, 1.9801984)
 shape = SubResource("CircleShape2D_ur7pv")
 
-[node name="ZoneAttaque" type="Area2D" parent="." unique_id=859443427 groups=["coup_de_lame"]]
+[node name="Hitbox" type="Area2D" parent="Direction" unique_id=1967968383]
+position = Vector2(19.801981, 1.9801981)
+scale = Vector2(2.680523, 0.92370844)
+collision_layer = 0
+collision_mask = 4
+metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ZoneAttaque" unique_id=2135801571]
-position = Vector2(13.811882, 2.970297)
-shape = SubResource("RectangleShape2D_vul4d")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Direction/Hitbox" unique_id=320211305]
+scale = Vector2(0.7185479, 2.3500097)
+shape = SubResource("RectangleShape2D_mod63")
+
+[node name="SwingSword" type="AudioStreamPlayer2D" parent="." unique_id=1936146349]
+
+[connection signal="body_entered" from="Direction/Hitbox" to="." method="_on_hitbox_body_entered"]

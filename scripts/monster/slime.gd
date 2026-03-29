@@ -4,110 +4,137 @@ extends CharacterBody2D
 @export var acceleration := 200.0
 @export var friction := 300.0
 
-@export var aggro_range := 120.0
 @export var stop_distance := 20.0
+@export var attack_cooldown := 1.0
 
-# errance
-@export var wander_radius := 100.0
-@export var change_dir_time_min := 1.0
-@export var change_dir_time_max := 3.0
+@onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 
-# pause
-@export var pause_min := 0.5
-@export var pause_max := 1.5
+var target: Node2D = null
 
-var target: Node2D
-var last_dir := "down"
+enum State {
+	WANDER,
+	CHASE
+}
 
-# état
-var is_pausing := false
-var pause_timer := 0.0
+var state := State.WANDER
 
 var wander_direction := Vector2.ZERO
 var wander_timer := 0.0
+
+@export var change_dir_time_min := 1.0
+@export var change_dir_time_max := 3.0
+
+var last_dir := "down"
+
+# 🔥 attaque
+var is_attacking := false
+var can_attack := true
+
+# 🔥 hitbox
+@onready var hitbox: Area2D = $Hitbox
+var player_in_hitbox := false
+
 
 # -------------------------
 # INIT
 # -------------------------
 func _ready():
-	target = get_tree().get_first_node_in_group("player")
 	_pick_new_direction()
+
 
 # -------------------------
 # PHYSICS
 # -------------------------
 func _physics_process(delta):
-
-	if target == null:
-		_wander(delta)
+	if is_attacking:
+		move_and_slide()
 		return
 
-	var distance = global_position.distance_to(target.global_position)
+	match state:
+		State.WANDER:
+			_wander(delta)
 
-	# 🎯 SI PROCHE → poursuite
-	if distance < aggro_range:
-		_chase_player(delta)
-	else:
-		# 🚶 SINON → errance
-		_wander(delta)
+		State.CHASE:
+			_chase(delta)
+			_try_attack()
+
+	move_and_slide()
+	_update_animation(velocity)
+
 
 # -------------------------
-# ERRANCE (MOUVEMENT LIBRE)
+# CHASE
+# -------------------------
+func _chase(delta: float) -> void:
+	if is_attacking:
+		return
+	
+	if target == null:
+		state = State.WANDER
+		return
+
+	var direction = target.global_position - global_position
+	var distance = direction.length()
+
+	if distance > stop_distance:
+		direction = direction.normalized()
+		velocity = velocity.move_toward(direction * speed, acceleration * delta)
+	else:
+		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
+
+
+# -------------------------
+# ATTAQUE
+# -------------------------
+func _try_attack() -> void:
+	if not player_in_hitbox or not can_attack:
+		return
+
+	_attack()
+
+
+func _attack() -> void:
+	if is_attacking:
+		return
+	
+	
+	is_attacking = true
+	can_attack = false
+	
+	velocity = Vector2.ZERO
+	
+	# 🔥 jouer l’animation d’attaque
+	anim.play("attack_" + last_dir)
+
+	print("💥 Attaque !")
+
+	# 🔥 dégâts
+	if target and target.has_method("take_damage"):
+		target.take_damage(1, global_position)
+
+	# 🔥 attendre cooldown
+	await get_tree().create_timer(attack_cooldown).timeout
+
+	is_attacking = false
+	can_attack = true
+
+
+# -------------------------
+# WANDER
 # -------------------------
 func _wander(delta):
-
-	# pause
-	if is_pausing:
-		pause_timer -= delta
-		_slow_down(delta)
-		_update_animation(velocity)
-
-		if pause_timer <= 0:
-			is_pausing = false
-			_pick_new_direction()
+	if is_attacking:
 		return
-
-	# chance de pause
-	if randf() < 0.01:
-		is_pausing = true
-		pause_timer = randf_range(pause_min, pause_max)
-		return
-
-	# changement direction
+	
 	wander_timer -= delta
+
 	if wander_timer <= 0:
 		_pick_new_direction()
 
 	var target_velocity = wander_direction * speed * 0.6
 	velocity = velocity.move_toward(target_velocity, acceleration * delta)
 
-	move_and_slide()
-	_update_animation(velocity)
 
-# -------------------------
-# POURSUITE JOUEUR
-# -------------------------
-func _chase_player(delta):
-
-	var dir = (target.global_position - global_position).normalized()
-	var distance = global_position.distance_to(target.global_position)
-
-	# évite de coller
-	var repulsion = Vector2.ZERO
-	if distance < stop_distance:
-		repulsion = -dir * 1.2
-
-	var final_dir = (dir + repulsion).normalized()
-
-	var target_velocity = final_dir * speed
-	velocity = velocity.move_toward(target_velocity, acceleration * delta)
-
-	move_and_slide()
-	_update_animation(velocity)
-
-# -------------------------
-# NOUVELLE DIRECTION
-# -------------------------
 func _pick_new_direction():
 	wander_direction = Vector2(
 		randf_range(-1.0, 1.0),
@@ -116,36 +143,55 @@ func _pick_new_direction():
 
 	wander_timer = randf_range(change_dir_time_min, change_dir_time_max)
 
-# -------------------------
-# RALENTISSEMENT
-# -------------------------
-func _slow_down(delta):
-	velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
-	move_and_slide()
 
 # -------------------------
-# ANIMATIONS
+# DETECTION (SIGHT)
+# -------------------------
+func _on_sight_body_entered(body: Node2D) -> void:
+	if body.name == "Player1":
+		target = body
+		state = State.CHASE
+		print("👀 Player détecté :", target)
+
+
+func _on_sight_body_exited(body: Node2D) -> void:
+	if body.name == "Player1":
+		target = null
+		state = State.WANDER
+		print("❌ Player perdu")
+
+
+# -------------------------
+# HITBOX
+# -------------------------
+func _on_hitbox_body_entered(body: Node2D) -> void:
+	if body.name == "Player1":
+		print("uhzbfzefz")
+		player_in_hitbox = true
+		target = body
+
+
+func _on_hitbox_body_exited(body: Node2D) -> void:
+	if body.name == "Player1":
+		player_in_hitbox = false
+
+
+# -------------------------
+# ANIMATION
 # -------------------------
 func _update_animation(vel: Vector2):
-	var anim := $AnimatedSprite2D
 
-	if vel.length() < 5:
-		if anim.animation != "idle_" + last_dir:
-			anim.play("idle_" + last_dir)
+	# 🔥 PRIORITÉ ABSOLUE : attaque
+	if is_attacking:
 		return
 
-	var dir_name := _get_direction_name(vel)
+	if vel.length() < 1:
+		anim.play("idle_" + last_dir)
+		return
 
-	if anim.animation != "run_" + dir_name:
-		anim.play("run_" + dir_name)
-
-# -------------------------
-# DIRECTION
-# -------------------------
-func _get_direction_name(dir: Vector2) -> String:
-	if abs(dir.x) > abs(dir.y):
-		last_dir = "right" if dir.x > 0 else "left"
+	if abs(vel.x) > abs(vel.y):
+		last_dir = "right" if vel.x > 0 else "left"
 	else:
-		last_dir = "down" if dir.y > 0 else "up"
+		last_dir = "down" if vel.y > 0 else "up"
 
-	return last_dir
+	anim.play("run_" + last_dir)
