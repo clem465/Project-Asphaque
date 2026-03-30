@@ -8,7 +8,22 @@ extends CharacterBody2D
 @export var attack_cooldown := 1.0
 
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
+@onready var hitbox: Area2D = $Hitbox
+@onready var health_bar: ProgressBar = $HealthBar
 
+# -------------------------
+# STATS
+# -------------------------
+@export var max_health := 5
+@export var attack := 1
+@export var defense := 0
+
+var health := max_health
+var invulnerable := false
+
+# -------------------------
+# IA
+# -------------------------
 var target: Node2D = null
 
 enum State {
@@ -26,14 +41,12 @@ var wander_timer := 0.0
 
 var last_dir := "down"
 
-# 🔥 attaque
+# -------------------------
+# ATTAQUE
+# -------------------------
 var is_attacking := false
 var can_attack := true
-
-# 🔥 hitbox
-@onready var hitbox: Area2D = $Hitbox
 var player_in_hitbox := false
-
 
 # -------------------------
 # INIT
@@ -41,11 +54,26 @@ var player_in_hitbox := false
 func _ready():
 	_pick_new_direction()
 
+	# 🔥 init barre de vie
+	health_bar.max_value = max_health
+	health_bar.value = health
+
+	# 🟩 STYLE PROPRE (Godot 4)
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.2, 0.2, 0.2)
+
+	var fill = StyleBoxFlat.new()
+	fill.bg_color = Color(0.2, 0.8, 0.2)
+
+	# ✅ BONNE MÉTHODE GODOT 4
+	health_bar.set("theme_override_styles/background", bg)
+	health_bar.set("theme_override_styles/fill", fill)
 
 # -------------------------
 # PHYSICS
 # -------------------------
 func _physics_process(delta):
+
 	if is_attacking:
 		move_and_slide()
 		return
@@ -61,14 +89,11 @@ func _physics_process(delta):
 	move_and_slide()
 	_update_animation(velocity)
 
-
 # -------------------------
 # CHASE
 # -------------------------
-func _chase(delta: float) -> void:
-	if is_attacking:
-		return
-	
+func _chase(delta):
+
 	if target == null:
 		state = State.WANDER
 		return
@@ -82,50 +107,35 @@ func _chase(delta: float) -> void:
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
 
-
 # -------------------------
 # ATTAQUE
 # -------------------------
-func _try_attack() -> void:
-	if not player_in_hitbox or not can_attack:
+func _try_attack():
+	if not player_in_hitbox or not can_attack or target == null:
 		return
 
 	_attack()
 
-
-func _attack() -> void:
-	if is_attacking:
-		return
-	
-	
+func _attack():
 	is_attacking = true
 	can_attack = false
-	
 	velocity = Vector2.ZERO
-	
-	# 🔥 jouer l’animation d’attaque
+
 	anim.play("attack_" + last_dir)
 
-	print("💥 Attaque !")
+	if target.has_method("take_damage"):
+		target.take_damage(attack, global_position)
 
-	# 🔥 dégâts
-	if target and target.has_method("take_damage"):
-		target.take_damage(1, global_position)
-
-	# 🔥 attendre cooldown
 	await get_tree().create_timer(attack_cooldown).timeout
 
 	is_attacking = false
 	can_attack = true
 
-
 # -------------------------
 # WANDER
 # -------------------------
 func _wander(delta):
-	if is_attacking:
-		return
-	
+
 	wander_timer -= delta
 
 	if wander_timer <= 0:
@@ -133,7 +143,6 @@ func _wander(delta):
 
 	var target_velocity = wander_direction * speed * 0.6
 	velocity = velocity.move_toward(target_velocity, acceleration * delta)
-
 
 func _pick_new_direction():
 	wander_direction = Vector2(
@@ -143,45 +152,87 @@ func _pick_new_direction():
 
 	wander_timer = randf_range(change_dir_time_min, change_dir_time_max)
 
-
 # -------------------------
-# DETECTION (SIGHT)
+# DETECTION
 # -------------------------
-func _on_sight_body_entered(body: Node2D) -> void:
-	if body.name == "Player1":
+func _on_sight_body_entered(body):
+	if body.is_in_group("player"):
 		target = body
 		state = State.CHASE
-		print("👀 Player détecté :", target)
 
-
-func _on_sight_body_exited(body: Node2D) -> void:
-	if body.name == "Player1":
+func _on_sight_body_exited(body):
+	if body == target:
 		target = null
 		state = State.WANDER
-		print("❌ Player perdu")
-
 
 # -------------------------
 # HITBOX
 # -------------------------
-func _on_hitbox_body_entered(body: Node2D) -> void:
-	if body.name == "Player1":
-		print("uhzbfzefz")
+func _on_hitbox_body_entered(body):
+	if body.is_in_group("player"):
 		player_in_hitbox = true
 		target = body
 
-
-func _on_hitbox_body_exited(body: Node2D) -> void:
-	if body.name == "Player1":
+func _on_hitbox_body_exited(body):
+	if body.is_in_group("player"):
 		player_in_hitbox = false
 
+# -------------------------
+# DÉGÂTS + EFFET ROUGE 🔴
+# -------------------------
+func take_damage(amount: int, source_position: Vector2):
+
+	if invulnerable:
+		return
+
+	invulnerable = true
+
+	var damage = max(amount - defense, 1)
+	health -= damage
+
+	health_bar.value = health
+
+	# 🔴 FLASH ROUGE
+	anim.modulate = Color(1, 0.2, 0.2)
+
+	# 💥 knockback
+	var dir = (global_position - source_position).normalized()
+	velocity += dir * 80
+
+	if health <= 0:
+		die()
+
+	# ⏱️ reset couleur
+	await get_tree().create_timer(0.1).timeout
+	anim.modulate = Color(1, 1, 1)
+
+	await get_tree().create_timer(0.3).timeout
+	invulnerable = false
+
+# -------------------------
+# MORT
+# -------------------------
+func die():
+	# empêche toute action
+	set_physics_process(false)
+	velocity = Vector2.ZERO
+	is_attacking = false
+	can_attack = false
+
+	# joue l'animation de mort
+	anim.play("die_" + last_dir)
+
+	# attendre que l'animation se termine
+	await anim.animation_finished
+
+	# supprimer le slime
+	queue_free()
 
 # -------------------------
 # ANIMATION
 # -------------------------
-func _update_animation(vel: Vector2):
+func _update_animation(vel):
 
-	# 🔥 PRIORITÉ ABSOLUE : attaque
 	if is_attacking:
 		return
 
@@ -195,3 +246,9 @@ func _update_animation(vel: Vector2):
 		last_dir = "down" if vel.y > 0 else "up"
 
 	anim.play("run_" + last_dir)
+
+# -------------------------
+# UI
+# -------------------------
+func _process(delta):
+	health_bar.visible = health < max_health

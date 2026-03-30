@@ -761,15 +761,13 @@ radius = 23.762377
 z_index = 2
 scale = Vector2(0.505, 0.505)
 collision_layer = 2
-collision_mask = 9
+collision_mask = 25
 script = ExtResource("1_mod63")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=218171934]
 sprite_frames = SubResource("SpriteFrames_y4r1p")
-animation = &"attack_right"
+animation = &"idle_down"
 autoplay = "idle_down"
-frame = 1
-frame_progress = 0.86433995
 metadata/_edit_lock_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=321125183]
@@ -780,7 +778,7 @@ metadata/_edit_lock_ = true
 [node name="Direction" type="Marker2D" parent="." unique_id=341479417]
 
 [node name="ActionableFinder" type="Area2D" parent="Direction" unique_id=2114118353]
-collision_layer = 0
+collision_layer = 2
 collision_mask = 16
 metadata/_edit_lock_ = true
 

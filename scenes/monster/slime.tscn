@@ -755,7 +755,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_d626b")
 }],
-"loop": true,
+"loop": false,
 "name": &"die_down",
 "speed": 10.0
 }, {
@@ -790,7 +790,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_wnt3h")
 }],
-"loop": true,
+"loop": false,
 "name": &"die_left",
 "speed": 10.0
 }, {
@@ -825,7 +825,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_vgb5w")
 }],
-"loop": true,
+"loop": false,
 "name": &"die_right",
 "speed": 10.0
 }, {
@@ -860,7 +860,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_jtf4v")
 }],
-"loop": true,
+"loop": false,
 "name": &"die_up",
 "speed": 10.0
 }, {
@@ -1115,9 +1115,8 @@ script = ExtResource("1_a4kuf")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=494977689]
 scale = Vector2(0.640625, 0.59375)
 sprite_frames = SubResource("SpriteFrames_a4kuf")
-animation = &"attack_up"
+animation = &"die_up"
 autoplay = "idle_down"
-frame = 7
 metadata/_edit_lock_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1782175873]
@@ -1138,6 +1137,13 @@ metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=902185224]
 shape = SubResource("CircleShape2D_g05h0")
+
+[node name="HealthBar" type="ProgressBar" parent="." unique_id=96525439]
+offset_left = -9.0
+offset_top = -7.0
+offset_right = 9.0
+offset_bottom = -3.0
+show_percentage = false
 
 [connection signal="body_entered" from="Sight" to="." method="_on_sight_body_entered"]
 [connection signal="body_exited" from="Sight" to="." method="_on_sight_body_exited"]

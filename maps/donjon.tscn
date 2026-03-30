@@ -4,6 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://cu2rw7c831w30" path="res://assets/tilesets/0x72_DungeonTilesetII_v1.7.png" id="2_2bids"]
 [ext_resource type="Script" uid="uid://b17bg3tm7xjk4" path="res://maps/donjon.gd" id="2_6dfai"]
 [ext_resource type="PackedScene" uid="uid://deje0qbjyjjj7" path="res://scenes/player1.tscn" id="3_mctgr"]
+[ext_resource type="PackedScene" path="res://scenes/minimap_ui.tscn" id="5_p3qwm"]
+[ext_resource type="PackedScene" uid="uid://chsi482ynffuu" path="res://scenes/object/porte.tscn" id="6_pw7mp"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6dfai"]
 texture = ExtResource("1_6dfai")
@@ -949,3 +951,15 @@ limit_top = -1551
 limit_right = 3574
 limit_bottom = 3116
 limit_smoothed = true
+
+[node name="MinimapUI" parent="Player1" unique_id=1175049167 instance=ExtResource("5_p3qwm")]
+
+[node name="HealthBar" type="ProgressBar" parent="Player1" unique_id=1191022679]
+offset_left = -368.31686
+offset_top = -196.0396
+offset_right = -233.48508
+offset_bottom = -176.2376
+show_percentage = false
+
+[node name="Porte" parent="." unique_id=1387550635 instance=ExtResource("6_pw7mp")]
+position = Vector2(617.00006, 434.00003)

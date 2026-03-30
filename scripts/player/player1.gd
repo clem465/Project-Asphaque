@@ -5,34 +5,70 @@ extends CharacterBody2D
 @onready var actionable_finder: Area2D = $Direction/ActionableFinder
 @onready var hitbox: Area2D = $Direction/Hitbox
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var health_bar: ProgressBar = $HealthBar
 
+# -------------------------
+# STATS
+# -------------------------
+@export var max_health := 25
+@export var attack := 10
+@export var defense := 3
+
+var health := 0
+
+# -------------------------
+# ÉTAT
+# -------------------------
 var input_vector := Vector2.ZERO
 var last_direction := "down"
 var is_attacking := false
 
 var hitbox_offset := Vector2.ZERO
+var already_hit: Array = []
 
+# -------------------------
+# INIT
+# -------------------------
 func _ready() -> void:
-	# Position de base de la hitbox
+	add_to_group("player")
+
+	health = max_health
 	hitbox_offset = hitbox.position
 
+	# UI
+	health_bar.max_value = max_health
+	health_bar.value = health
 
+	# Style
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.2, 0.2, 0.2)
+
+	var fill = StyleBoxFlat.new()
+	fill.bg_color = Color(0.2, 0.8, 0.2)
+
+	health_bar.set("theme_override_styles/background", bg)
+	health_bar.set("theme_override_styles/fill", fill)
+
+# -------------------------
+# INPUT
+# -------------------------
 func _unhandled_input(event: InputEvent) -> void:
-	# Interaction
+
 	if Input.is_action_just_pressed("interact"):
 		var actionables = actionable_finder.get_overlapping_areas()
-		
 		if actionables.size() > 0:
 			var target = actionables[0]
 			if target.has_method("action"):
 				target.action()
-	
-	# Attaque
+
 	if Input.is_action_just_pressed("attack") and not is_attacking:
 		_attack()
 
+# -------------------------
+# PHYSICS
+# -------------------------
+func _physics_process(delta: float) -> void:
 
-func _physics_process(delta: float) -> void:	
 	if not is_attacking:
 		_get_input()
 	else:
@@ -43,7 +79,11 @@ func _physics_process(delta: float) -> void:
 
 	_update_animation()
 
+	health_bar.visible = health < max_health
 
+# -------------------------
+# INPUT VECTOR
+# -------------------------
 func _get_input() -> void:
 	input_vector = Vector2(
 		Input.get_action_strength("move_right") - Input.get_action_strength("move_left"),
@@ -53,10 +93,13 @@ func _get_input() -> void:
 	if input_vector.length() > 1:
 		input_vector = input_vector.normalized()
 
-
+# -------------------------
+# ANIMATION
+# -------------------------
 func _update_animation() -> void:
+
 	_update_hitbox_position()
-	
+
 	if is_attacking:
 		animated_sprite.play("attack_" + last_direction)
 		return
@@ -65,6 +108,7 @@ func _update_animation() -> void:
 		animated_sprite.play("idle_" + last_direction)
 		return
 
+	# Direction + animation
 	if abs(input_vector.x) > abs(input_vector.y):
 		if input_vector.x > 0:
 			last_direction = "right"
@@ -80,46 +124,73 @@ func _update_animation() -> void:
 			last_direction = "up"
 			animated_sprite.play("run_up")
 
-
-# 🔥 Position de la hitbox selon la direction
+# -------------------------
+# HITBOX
+# -------------------------
 func _update_hitbox_position() -> void:
 	var base := hitbox_offset
 
 	match last_direction:
 		"left":
-			hitbox.position = Vector2(-base.x, base.y)
-
+			hitbox.position = Vector2(-abs(base.x), base.y)
 		"right":
-			hitbox.position = base
-
+			hitbox.position = Vector2(abs(base.x), base.y)
 		"up":
-			hitbox.position = Vector2(base.y-2, -base.x)
-
+			hitbox.position = Vector2(0, -abs(base.y))
 		"down":
-			hitbox.position = Vector2(-base.y+2, base.x)
+			hitbox.position = Vector2(0, abs(base.y))
 
-
+# -------------------------
+# ATTAQUE
+# -------------------------
 func _attack() -> void:
 	is_attacking = true
+	already_hit.clear()
 
 	hitbox.monitoring = true
-
-	await get_tree().process_frame
-
-	var targets = hitbox.get_overlapping_bodies()
-	print("Targets:", targets.size())
-
-	for target in targets:
-		if target.has_method("take_damage"):
-			target.take_damage(1, global_position)
 
 	await get_tree().create_timer(0.2).timeout
 
 	hitbox.monitoring = false
 	is_attacking = false
 
-
+# -------------------------
+# HITBOX DETECTION
+# -------------------------
 func _on_hitbox_body_entered(body: Node2D) -> void:
-	if is_attacking:
-		print(body.name)
-		print("HIT")
+
+	if not is_attacking:
+		return
+
+	if already_hit.has(body):
+		return
+
+	if body.has_method("take_damage"):
+		body.take_damage(attack, global_position)
+		already_hit.append(body)
+
+# -------------------------
+# DAMAGE
+# -------------------------
+func take_damage(amount: int, source_position: Vector2):
+
+	var damage = max(amount - defense, 1)
+	health -= damage
+
+	health_bar.value = health
+
+	print("Player prend", damage, "dégâts | Vie:", health)
+
+	# knockback propre
+	var dir = (global_position - source_position).normalized()
+	velocity += dir * 150
+
+	if health <= 0:
+		die()
+
+# -------------------------
+# MORT
+# -------------------------
+func die():
+	print("💀 Player mort")
+	queue_free()
