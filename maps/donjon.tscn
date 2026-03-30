@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://b17bg3tm7xjk4" path="res://maps/donjon.gd" id="2_6dfai"]
 [ext_resource type="PackedScene" uid="uid://deje0qbjyjjj7" path="res://scenes/player1.tscn" id="3_mctgr"]
 [ext_resource type="PackedScene" path="res://scenes/minimap_ui.tscn" id="5_p3qwm"]
-[ext_resource type="PackedScene" uid="uid://chsi482ynffuu" path="res://scenes/object/porte.tscn" id="6_pw7mp"]
+[ext_resource type="PackedScene" uid="uid://chsi482ynffuu" path="res://scenes/object/door.tscn" id="6_pw7mp"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6dfai"]
 texture = ExtResource("1_6dfai")

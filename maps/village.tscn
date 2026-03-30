@@ -374,7 +374,7 @@ layer_3/z_index = 4
 
 [node name="Player" parent="." unique_id=899918847 instance=ExtResource("3_dnl03")]
 z_index = 5
-position = Vector2(80, -13)
+position = Vector2(128, -3)
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=1454367891]
 position = Vector2(-13.861389, -3.9604187)

@@ -1,0 +1,10 @@
+~ start
+
+Porte: Salam roya !
+Porte: Tu veux sortir du donjon ?
+
+- Oui => go_dungeon
+- Non => END
+
+~ go_dungeon
+=> END
