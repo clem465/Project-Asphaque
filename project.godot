@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 DialogueManager="*uid://c3rodes2l3gxb"
 Music="*uid://bvstecdyjgao7"
+GameState="*uid://cragcubd7svl6"
 
 [dialogue_manager]
 
@@ -67,7 +68,7 @@ attack={
 
 [internationalization]
 
-locale/translations_pot_files=PackedStringArray("res://dialogue/npc1.dialogue", "res://dialogue/door.dialogue")
+locale/translations_pot_files=PackedStringArray("res://dialogue/npc1.dialogue", "res://dialogue/door.dialogue", "res://dialogue/npc2.dialogue", "res://dialogue/shopkeeper.dialogue")
 
 [layer_names]
 

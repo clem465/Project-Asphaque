@@ -12,7 +12,9 @@ func action():
 	if not dialogue_done:
 		start_dialogue()
 	else:
-		teleport()
+		# 🔥 seulement si le joueur a dit oui
+		if GameState.choice == "yes":
+			teleport()
 
 
 func start_dialogue():
@@ -23,8 +25,15 @@ func start_dialogue():
 
 
 func _on_dialogue_finished():
-	dialogue_done = true
-	teleport()
+	if GameState.choice == "yes":
+		dialogue_done = true
+
+	# 🔥 téléporte uniquement si "Oui"
+	if GameState.choice == "yes":
+		teleport()
+
+	# reset pour éviter bugs
+	GameState.choice = ""
 
 
 func teleport():

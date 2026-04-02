@@ -5,14 +5,10 @@ extends Area2D
 
 @export var target_scene: String = "res://maps/village.tscn"
 
-var dialogue_done := false
 var player_in_area := false
 var is_in_dialogue := false
 
 
-# -------------------------
-# ACTION
-# -------------------------
 func action():
 	if not player_in_area:
 		return
@@ -20,15 +16,9 @@ func action():
 	if is_in_dialogue:
 		return
 
-	if not dialogue_done:
-		start_dialogue()
-	else:
-		teleport()
+	start_dialogue()
 
 
-# -------------------------
-# DIALOGUE
-# -------------------------
 func start_dialogue():
 	var balloon = DialogueManager.show_dialogue_balloon(dialogue_resource, dialogue_start)
 	
@@ -37,21 +27,19 @@ func start_dialogue():
 		return
 	
 	is_in_dialogue = true
-
 	balloon.tree_exited.connect(_on_dialogue_finished, CONNECT_ONE_SHOT)
 
 
 func _on_dialogue_finished():
 	is_in_dialogue = false
-	dialogue_done = true
 
-	# ⚠️ ici tu peux choisir de ne PAS téléporter automatiquement
-	teleport()
+	if GameState.choice == "yes":
+		teleport()
+
+	# reset
+	GameState.choice = ""
 
 
-# -------------------------
-# TELEPORT
-# -------------------------
 func teleport():
 	if target_scene == "":
 		return
@@ -59,9 +47,6 @@ func teleport():
 	get_tree().change_scene_to_file(target_scene)
 
 
-# -------------------------
-# DETECTION
-# -------------------------
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		player_in_area = true
