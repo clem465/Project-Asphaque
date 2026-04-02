@@ -395,4 +395,5 @@ position = Vector2(107, -29)
 scale = Vector2(0.5, 0.5)
 
 [node name="npc2" parent="." unique_id=2039283005 instance=ExtResource("6_0btfk")]
-position = Vector2(7, 76)
+z_index = 1
+position = Vector2(7, 107)

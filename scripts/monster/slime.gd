@@ -52,6 +52,7 @@ var player_in_hitbox := false
 # INIT
 # -------------------------
 func _ready():
+	add_to_group("enemy")
 	_pick_new_direction()
 
 	# 🔥 init barre de vie
