@@ -5,6 +5,10 @@ extends CanvasLayer
 @export var map_viewport: SubViewport
 @export var map_camera: Camera2D
 
+@export var fog_cell_size: float = 32.0
+@export var visible_radius_world: float = 120.0
+@export var fog_disabled_scene_keywords: PackedStringArray = ["hub", "village"]
+
 @export var inventory_button: Button
 @export var inventory_window: Panel
 
@@ -23,6 +27,19 @@ extends CanvasLayer
 @onready var inventory_opacity_slider: HSlider = $InventoryWindow/TitleBar/Header/OpacitySlider
 @onready var stats_opacity_slider: HSlider = $StatsWindow/TitleBar/Header/OpacitySlider
 @onready var actions_opacity_slider: HSlider = $ActionsWindow/TitleBar/Header/OpacitySlider
+@onready var fog_overlay: TextureRect = $MinimapWindow/MapContainer/FogOverlay
+
+var _map_bounds: Rect2 = Rect2()
+var _fog_grid_size: Vector2i = Vector2i.ZERO
+var _discovered_image: Image
+var _fog_display_image: Image
+var _fog_texture: ImageTexture
+var _fog_atlas: AtlasTexture
+var _player_ref: Node2D
+var _last_player_pos: Vector2 = Vector2.ZERO
+var _has_last_player_pos: bool = false
+var _fog_ready: bool = false
+var _fog_enabled_for_scene: bool = true
 
 func _ready() -> void:
 	if toggle_button:
@@ -75,12 +92,51 @@ func _ready() -> void:
 	
 	if map_camera:
 		map_camera.make_current()
+		_configure_minimap_cull_mask()
+
+	_setup_fog_overlay()
 
 	call_deferred("_center_map")
+
+func _process(_delta: float) -> void:
+	if not _fog_enabled_for_scene or not _fog_ready:
+		return
+
+	_update_fog_overlay_region()
+	_update_fog_discovery()
+
+func _setup_fog_overlay() -> void:
+	if fog_overlay == null:
+		return
+
+	fog_overlay.texture = null
+	fog_overlay.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fog_overlay.stretch_mode = TextureRect.STRETCH_SCALE
+	fog_overlay.visible = true
+
+func _configure_minimap_cull_mask() -> void:
+	# Keep only canvas layer 1 visible in minimap.
+	# Health bars are moved to layer 2 in gameplay scripts.
+	var configured := false
+
+	if map_viewport and map_viewport.has_method("set_canvas_cull_mask_bit"):
+		for layer_bit in range(0, 20):
+			map_viewport.set_canvas_cull_mask_bit(layer_bit, layer_bit == 0)
+		configured = true
+
+	# Compatibility fallback in case viewport API differs.
+	if not configured and map_camera:
+		if map_camera.has_method("set_cull_mask_value"):
+			for layer in range(1, 21):
+				map_camera.set_cull_mask_value(layer, layer == 1)
+		elif map_camera.has_method("set_canvas_cull_mask_bit"):
+			for layer_bit in range(0, 20):
+				map_camera.set_canvas_cull_mask_bit(layer_bit, layer_bit == 0)
 
 func _on_window_resized() -> void:
 	if map_container and map_viewport:
 		map_viewport.size = map_container.size
+	_update_fog_overlay_region()
 
 func _on_opacity_changed(value: float) -> void:
 	if minimap_window:
@@ -119,9 +175,181 @@ func _center_map() -> void:
 	if main_cam and map_camera:
 		map_camera.global_position = main_cam.global_position
 
+	_fog_enabled_for_scene = _should_enable_fog_for_scene()
+	if not _fog_enabled_for_scene:
+		_disable_fog_overlay()
+
 	var bounds = _compute_map_bounds()
 	if bounds.size.x > 0.0 and bounds.size.y > 0.0 and map_container:
+		_map_bounds = bounds
 		map_container.set_map_bounds(bounds)
+		if _fog_enabled_for_scene:
+			_initialize_fog(bounds)
+
+func _should_enable_fog_for_scene() -> bool:
+	var root: Node = get_tree().current_scene
+	if root == null:
+		return true
+
+	var scene_path: String = root.scene_file_path.to_lower()
+	for raw_keyword in fog_disabled_scene_keywords:
+		var keyword: String = String(raw_keyword).to_lower()
+		if keyword != "" and scene_path.contains(keyword):
+			return false
+
+	return true
+
+func _disable_fog_overlay() -> void:
+	_fog_ready = false
+	if fog_overlay:
+		fog_overlay.visible = false
+
+func _initialize_fog(bounds: Rect2) -> void:
+	if fog_overlay == null:
+		return
+
+	var grid_w: int = maxi(1, int(ceil(bounds.size.x / fog_cell_size)))
+	var grid_h: int = maxi(1, int(ceil(bounds.size.y / fog_cell_size)))
+	var next_grid := Vector2i(grid_w, grid_h)
+
+	if _fog_ready and next_grid == _fog_grid_size:
+		_update_fog_overlay_region()
+		_update_fog_discovery()
+		return
+
+	_fog_grid_size = next_grid
+	_discovered_image = Image.create(grid_w, grid_h, false, Image.FORMAT_RGBA8)
+	_discovered_image.fill(Color(0, 0, 0, 1))
+	_fog_display_image = Image.create(grid_w, grid_h, false, Image.FORMAT_RGBA8)
+	_fog_display_image.fill(Color(0, 0, 0, 1))
+	_fog_texture = ImageTexture.create_from_image(_fog_display_image)
+	_fog_atlas = AtlasTexture.new()
+	_fog_atlas.atlas = _fog_texture
+	_fog_atlas.region = Rect2(Vector2.ZERO, Vector2(grid_w, grid_h))
+	fog_overlay.texture = _fog_atlas
+	fog_overlay.visible = true
+	_has_last_player_pos = false
+	_fog_ready = true
+
+	_update_fog_overlay_region()
+	_update_fog_discovery()
+
+func _update_fog_overlay_region() -> void:
+	if not _fog_ready or fog_overlay == null or _fog_atlas == null or map_camera == null or map_viewport == null:
+		return
+
+	var safe_zoom: Vector2 = map_camera.zoom
+	if safe_zoom.x == 0.0:
+		safe_zoom.x = 1.0
+	if safe_zoom.y == 0.0:
+		safe_zoom.y = 1.0
+
+	# Camera2D zoom reduces visible world when values grow, so world size is viewport / zoom.
+	var view_size_world: Vector2 = Vector2(map_viewport.size) / safe_zoom
+	var view_min_world: Vector2 = map_camera.global_position - view_size_world * 0.5
+
+	var tex_pos: Vector2 = (view_min_world - _map_bounds.position) / fog_cell_size
+	var tex_size: Vector2 = view_size_world / fog_cell_size
+
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+
+	var max_x: float = float(_fog_grid_size.x) - tex_size.x
+	var max_y: float = float(_fog_grid_size.y) - tex_size.y
+
+	if max_x < 0.0:
+		tex_pos.x = 0.0
+		tex_size.x = float(_fog_grid_size.x)
+	else:
+		tex_pos.x = clamp(tex_pos.x, 0.0, max_x)
+
+	if max_y < 0.0:
+		tex_pos.y = 0.0
+		tex_size.y = float(_fog_grid_size.y)
+	else:
+		tex_pos.y = clamp(tex_pos.y, 0.0, max_y)
+
+	_fog_atlas.region = Rect2(tex_pos, tex_size)
+
+func _get_player_ref() -> Node2D:
+	if _player_ref and is_instance_valid(_player_ref):
+		return _player_ref
+
+	var group_player: Node = get_tree().get_first_node_in_group("player")
+	if group_player is Node2D:
+		_player_ref = group_player
+		return _player_ref
+
+	var root: Node = get_tree().current_scene
+	if root:
+		var fallback: Node = root.find_child("Player1", true, false)
+		if fallback is Node2D:
+			_player_ref = fallback
+
+	return _player_ref
+
+func _update_fog_discovery() -> void:
+	if not _fog_ready or _discovered_image == null or _fog_display_image == null or _fog_texture == null:
+		return
+
+	var player: Node2D = _get_player_ref()
+	if player == null:
+		return
+
+	var player_pos: Vector2 = player.global_position
+	if _has_last_player_pos and player_pos.distance_squared_to(_last_player_pos) < 1.0:
+		return
+
+	_last_player_pos = player_pos
+	_has_last_player_pos = true
+
+	var center: Vector2i = _world_to_fog_cell(player_pos)
+	var radius_cells: int = int(ceil(visible_radius_world / fog_cell_size))
+	var radius_world_sq: float = visible_radius_world * visible_radius_world
+
+	for y in range(-radius_cells, radius_cells + 1):
+		for x in range(-radius_cells, radius_cells + 1):
+			var cell := center + Vector2i(x, y)
+			if cell.x < 0 or cell.y < 0 or cell.x >= _fog_grid_size.x or cell.y >= _fog_grid_size.y:
+				continue
+
+			var cell_world: Vector2 = _fog_cell_center_world(cell)
+			if cell_world.distance_squared_to(player_pos) > radius_world_sq:
+				continue
+
+			_discovered_image.set_pixel(cell.x, cell.y, Color(1, 1, 1, 1))
+
+	_rebuild_fog_display(player_pos, radius_world_sq)
+
+func _rebuild_fog_display(player_pos: Vector2, radius_world_sq: float) -> void:
+
+	for y in range(_fog_grid_size.y):
+		for x in range(_fog_grid_size.x):
+			var fog_color: Color = Color(0.0, 0.0, 0.0, 1.0)
+
+			if _discovered_image.get_pixel(x, y).r > 0.5:
+				fog_color = Color(0.18, 0.18, 0.18, 0.55)
+
+			var cell_world: Vector2 = _fog_cell_center_world(Vector2i(x, y))
+			if cell_world.distance_squared_to(player_pos) <= radius_world_sq:
+				fog_color = Color(0.0, 0.0, 0.0, 0.0)
+
+			_fog_display_image.set_pixel(x, y, fog_color)
+
+	_fog_texture.update(_fog_display_image)
+
+func _world_to_fog_cell(world_pos: Vector2) -> Vector2i:
+	var local := world_pos - _map_bounds.position
+	return Vector2i(
+		int(floor(local.x / fog_cell_size)),
+		int(floor(local.y / fog_cell_size))
+	)
+
+func _fog_cell_center_world(cell: Vector2i) -> Vector2:
+	return _map_bounds.position + Vector2(
+		(float(cell.x) + 0.5) * fog_cell_size,
+		(float(cell.y) + 0.5) * fog_cell_size
+	)
 
 func _compute_map_bounds() -> Rect2:
 	var root = get_tree().current_scene

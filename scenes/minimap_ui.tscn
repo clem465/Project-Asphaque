@@ -145,6 +145,15 @@ target_window = NodePath("..")
 handle_input_locally = false
 size = Vector2i(400, 370)
 
+[node name="FogOverlay" type="TextureRect" parent="MinimapWindow/MapContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
 [node name="MapCamera" type="Camera2D" parent="MinimapWindow/MapContainer/MapViewport"]
 zoom = Vector2(0.8, 0.8)
 

@@ -959,6 +959,7 @@ offset_left = -368.31686
 offset_top = -196.0396
 offset_right = -233.48508
 offset_bottom = -176.2376
+visibility_layer = 2
 show_percentage = false
 
 [node name="Porte" parent="." unique_id=1387550635 instance=ExtResource("6_pw7mp")]

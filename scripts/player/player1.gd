@@ -38,6 +38,7 @@ func _ready() -> void:
 	# UI
 	health_bar.max_value = max_health
 	health_bar.value = health
+	health_bar.visibility_layer = 2
 
 	# Style
 	var bg = StyleBoxFlat.new()

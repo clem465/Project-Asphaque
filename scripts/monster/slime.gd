@@ -6,6 +6,7 @@ extends CharacterBody2D
 
 @export var stop_distance := 20.0
 @export var attack_cooldown := 1.0
+@export var minimap_live_radius_world := 120.0
 
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 @onready var hitbox: Area2D = $Hitbox
@@ -47,6 +48,7 @@ var last_dir := "down"
 var is_attacking := false
 var can_attack := true
 var player_in_hitbox := false
+var minimap_player_ref: Node2D = null
 
 # -------------------------
 # INIT
@@ -57,6 +59,7 @@ func _ready():
 	# 🔥 init barre de vie
 	health_bar.max_value = max_health
 	health_bar.value = health
+	health_bar.visibility_layer = 2
 
 	# 🟩 STYLE PROPRE (Godot 4)
 	var bg = StyleBoxFlat.new()
@@ -252,3 +255,26 @@ func _update_animation(vel):
 # -------------------------
 func _process(delta):
 	health_bar.visible = health < max_health
+	_update_minimap_visibility_layer()
+
+func _update_minimap_visibility_layer() -> void:
+	var player := _get_minimap_player_ref()
+	if player == null:
+		visibility_layer = 1
+		return
+
+	var radius_sq: float = minimap_live_radius_world * minimap_live_radius_world
+	if global_position.distance_squared_to(player.global_position) <= radius_sq:
+		visibility_layer = 1
+	else:
+		visibility_layer = 2
+
+func _get_minimap_player_ref() -> Node2D:
+	if minimap_player_ref and is_instance_valid(minimap_player_ref):
+		return minimap_player_ref
+
+	var candidate: Node = get_tree().get_first_node_in_group("player")
+	if candidate is Node2D:
+		minimap_player_ref = candidate
+
+	return minimap_player_ref
