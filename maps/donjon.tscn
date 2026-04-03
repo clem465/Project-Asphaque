@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://deje0qbjyjjj7" path="res://scenes/player1.tscn" id="3_mctgr"]
 [ext_resource type="PackedScene" path="res://scenes/minimap_ui.tscn" id="5_p3qwm"]
 [ext_resource type="PackedScene" uid="uid://chsi482ynffuu" path="res://scenes/object/door.tscn" id="6_pw7mp"]
+[ext_resource type="PackedScene" uid="uid://vq12pelks1ko" path="res://scenes/object/coinGold.tscn" id="7_ku6pb"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6dfai"]
 texture = ExtResource("1_6dfai")
@@ -964,3 +965,6 @@ show_percentage = false
 
 [node name="Porte" parent="." unique_id=1387550635 instance=ExtResource("6_pw7mp")]
 position = Vector2(617.00006, 434.00003)
+
+[node name="CoinGold" parent="." unique_id=1839601443 instance=ExtResource("7_ku6pb")]
+position = Vector2(597, 484)

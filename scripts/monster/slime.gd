@@ -54,6 +54,7 @@ var minimap_player_ref: Node2D = null
 # INIT
 # -------------------------
 func _ready():
+	add_to_group("enemy")
 	_pick_new_direction()
 
 	# 🔥 init barre de vie

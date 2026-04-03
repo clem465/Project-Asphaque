@@ -6,33 +6,41 @@ extends Area2D
 @export var target_scene: String = "res://maps/donjon.tscn"
 
 var dialogue_done := false
+var is_talking := false
 
 
 func action():
+	if is_talking:
+		return
+
 	if not dialogue_done:
 		start_dialogue()
 	else:
-		# 🔥 seulement si le joueur a dit oui
-		if GameState.choice == "yes":
-			teleport()
+		check_choice()
 
 
 func start_dialogue():
+	is_talking = true
+
 	var balloon = DialogueManager.show_dialogue_balloon(dialogue_resource, dialogue_start)
-	
+
 	if balloon:
 		balloon.tree_exited.connect(_on_dialogue_finished, CONNECT_ONE_SHOT)
 
 
 func _on_dialogue_finished():
+	is_talking = false
+	check_choice()
+
+
+func check_choice():
+	print("CHOICE =", GameState.choice)
+
 	if GameState.choice == "yes":
 		dialogue_done = true
-
-	# 🔥 téléporte uniquement si "Oui"
-	if GameState.choice == "yes":
 		teleport()
 
-	# reset pour éviter bugs
+	# reset propre
 	GameState.choice = ""
 
 

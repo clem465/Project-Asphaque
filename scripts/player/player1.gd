@@ -16,6 +16,8 @@ extends CharacterBody2D
 
 var health := 0
 
+var coins := 0
+
 # -------------------------
 # ÉTAT
 # -------------------------
@@ -159,6 +161,8 @@ func _attack() -> void:
 # HITBOX DETECTION
 # -------------------------
 func _on_hitbox_body_entered(body: Node2D) -> void:
+	if not body.is_in_group("enemy"):
+		return
 
 	if not is_attacking:
 		return
@@ -188,6 +192,13 @@ func take_damage(amount: int, source_position: Vector2):
 
 	if health <= 0:
 		die()
+
+# -------------------------
+# Ajouté pièce
+# -------------------------
+func add_coin(amount: int):
+	coins += amount
+	print("Coins:", coins)
 
 # -------------------------
 # MORT
