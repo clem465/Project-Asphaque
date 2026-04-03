@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/minimap_ui.tscn" id="4_dnl03"]
 [ext_resource type="PackedScene" uid="uid://dr0jm6fnwyjnt" path="res://scenes/npc/npc_1.tscn" id="4_sq3sw"]
 [ext_resource type="PackedScene" uid="uid://2qf6qd4ujpaa" path="res://scenes/npc/npc_2.tscn" id="6_0btfk"]
+[ext_resource type="PackedScene" uid="uid://bi26dl3nh21m0" path="res://scenes/npc/npc_3.tscn" id="7_ji2ix"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0btfk"]
 texture = ExtResource("1_q5nrs")
@@ -397,3 +398,8 @@ scale = Vector2(0.5, 0.5)
 [node name="npc2" parent="." unique_id=2039283005 instance=ExtResource("6_0btfk")]
 z_index = 1
 position = Vector2(7, 107)
+
+[node name="npc3" parent="." unique_id=1863927102 instance=ExtResource("7_ji2ix")]
+z_index = 1
+position = Vector2(56, 108)
+scale = Vector2(0.5, 0.5)

@@ -1,10 +1,15 @@
 extends CharacterBody2D
 
 @export var speed: float = 80.0
+@export var attack_damage: int = 10
+@export var attack_range: float = 34.0
+@export var attack_cooldown: float = 0.2
+@export var attack_facing_dot_threshold: float = 0.2
 @onready var actionable_finder: Area2D = $Direction/ActionableFinder
 
 var input_vector := Vector2.ZERO
 var last_direction := "down"
+var is_attacking := false
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -16,6 +21,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			
 			if target.has_method("action"):
 				target.action()
+
+	if Input.is_action_just_pressed("attack") and not is_attacking:
+		_attack()
 
 
 func _physics_process(delta: float) -> void:
@@ -55,3 +63,44 @@ func _update_animation() -> void:
 		else:
 			last_direction = "up"
 			anim.play("run_up")
+
+
+func _attack() -> void:
+	is_attacking = true
+	_try_attack_enemies()
+	await get_tree().create_timer(attack_cooldown).timeout
+	is_attacking = false
+
+
+func _try_attack_enemies() -> void:
+	var facing := _get_facing_vector()
+
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if not enemy is Node2D:
+			continue
+
+		var enemy_node := enemy as Node2D
+		var to_enemy := enemy_node.global_position - global_position
+		var distance := to_enemy.length()
+
+		if distance > attack_range or distance <= 0.001:
+			continue
+
+		var direction_to_enemy := to_enemy / distance
+		if facing.dot(direction_to_enemy) < attack_facing_dot_threshold:
+			continue
+
+		if enemy_node.has_method("take_damage"):
+			enemy_node.take_damage(attack_damage, global_position)
+
+
+func _get_facing_vector() -> Vector2:
+	match last_direction:
+		"left":
+			return Vector2.LEFT
+		"right":
+			return Vector2.RIGHT
+		"up":
+			return Vector2.UP
+		_:
+			return Vector2.DOWN

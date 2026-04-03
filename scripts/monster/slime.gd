@@ -229,6 +229,9 @@ func die():
 	# attendre que l'animation se termine
 	await anim.animation_finished
 
+	if GameState.has_method("add_kill"):
+		GameState.add_kill("slime")
+
 	# supprimer le slime
 	queue_free()
 
