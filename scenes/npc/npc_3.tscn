@@ -1,10 +1,8 @@
-[gd_scene format=3 uid="uid://2qf6qd4ujpaa"]
+[gd_scene format=3 uid="uid://bi26dl3nh21m0"]
 
 [ext_resource type="Texture2D" uid="uid://bx2l7bx575cpn" path="res://assets/npc/NPC_Characters_v1.0/Male3.png" id="1_g644d"]
-[ext_resource type="PackedScene" uid="uid://bhho1kj35s4cp" path="res://helpers/actionable.tscn" id="2_3q1wi"]
-[ext_resource type="Script" uid="uid://cmoj8sd5ggx0g" path="res://scripts/npc/npc_2.gd" id="3_foycd"]
-[ext_resource type="Resource" uid="uid://ln6xnvxeyhm4" path="res://dialogue/shopkeeper.dialogue" id="4_3rp44"]
-[ext_resource type="PackedScene" uid="uid://wi8kq04pwaem" path="res://scenes/npc/UI/Shop.tscn" id="5_3q1wi"]
+[ext_resource type="PackedScene" uid="uid://bhho1kj35s4cp" path="res://helpers/actionable.tscn" id="2_lgra0"]
+[ext_resource type="Script" uid="uid://cvfpppb6lgjvh" path="res://scripts/npc/npc_3.gd" id="3_ji2ix"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g644d"]
 atlas = ExtResource("1_g644d")
@@ -48,7 +46,7 @@ size = Vector2(9, 16)
 [sub_resource type="CircleShape2D" id="CircleShape2D_th0st"]
 radius = 44.04543
 
-[node name="npc2" type="CharacterBody2D" unique_id=2039283005]
+[node name="npc3" type="CharacterBody2D" unique_id=2039283005]
 collision_mask = 2
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1677987511]
@@ -62,10 +60,8 @@ frame_progress = 0.075480774
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1824837244]
 shape = SubResource("RectangleShape2D_p4nnn")
 
-[node name="Actionable" parent="." unique_id=130623042 instance=ExtResource("2_3q1wi")]
-script = ExtResource("3_foycd")
-dialogue_resource = ExtResource("4_3rp44")
-shop_ui_scene = ExtResource("5_3q1wi")
+[node name="Actionable" parent="." unique_id=130623042 instance=ExtResource("2_lgra0")]
+script = ExtResource("3_ji2ix")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Actionable" unique_id=1177984130]
 position = Vector2(1, 0)
