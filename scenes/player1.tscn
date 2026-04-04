@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://cylr3jcsckqsq" path="res://assets/hero/RUN/run_left.png" id="7_qrjn2"]
 [ext_resource type="Texture2D" uid="uid://c2ucqekujildg" path="res://assets/hero/RUN/run_right.png" id="8_tsh6u"]
 [ext_resource type="Texture2D" uid="uid://c5j76eyu4x18s" path="res://assets/hero/RUN/run_up.png" id="9_do31k"]
+[ext_resource type="AudioStream" uid="uid://bf7ud0ofh78y1" path="res://assets/audio/sounds/object/super-mario-coin-sound.mp3" id="14_tvatu"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tsh6u"]
 atlas = ExtResource("1_16ml7")
@@ -798,5 +799,8 @@ scale = Vector2(0.7185479, 2.3500097)
 shape = SubResource("RectangleShape2D_mod63")
 
 [node name="SwingSword" type="AudioStreamPlayer2D" parent="." unique_id=1936146349]
+
+[node name="CoinSound" type="AudioStreamPlayer2D" parent="." unique_id=386378995]
+stream = ExtResource("14_tvatu")
 
 [connection signal="body_entered" from="Direction/Hitbox" to="." method="_on_hitbox_body_entered"]

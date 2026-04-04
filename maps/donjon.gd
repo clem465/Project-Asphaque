@@ -13,6 +13,13 @@ const MONSTER_COUNT := 15
 const MIN_DISTANCE_FROM_SPAWN := 6
 
 # -------------------------
+# COFFRES
+# -------------------------
+const CHEST_SCENE = preload("res://scenes/object/chest.tscn")
+const CHEST_COUNT := 6
+const MIN_DISTANCE_CHEST_FROM_SPAWN := 5
+
+# -------------------------
 # TILES
 # -------------------------
 const FLOOR := Vector2i(3, 3)
@@ -69,16 +76,125 @@ func generate():
 	# 4. smoothing
 	grid = smooth(grid, 2)
 
-	# 5. tiles
+	# 5. connectivité
+	grid = keep_connected_area(grid)
+
+	# 6. tiles
 	place_tiles(grid)
 
-	# 6. spawn monstres
+	# 7. spawn coffres ✅
+	spawn_chests(grid)
+
+	# 8. spawn monstres
 	spawn_monsters(grid)
 
 	print("Spawn joueur:", SPAWN_POS)
 
 # -------------------------
-# SPAWN MONSTRES (AMÉLIORÉ)
+# SPAWN COFFRES
+# -------------------------
+func spawn_chests(grid):
+	var spawned = 0
+	var attempts = 0
+	var max_attempts = CHEST_COUNT * 40  # + d'essais car plus restrictif
+
+	var used_positions = []
+
+	while spawned < CHEST_COUNT and attempts < max_attempts:
+		attempts += 1
+
+		var x = randi() % SIZE.x
+		var y = randi() % SIZE.y
+		var pos = Vector2i(x, y)
+
+		# -------------------------
+		# CONDITIONS
+		# -------------------------
+
+		# Doit être du sol
+		if not grid[x][y]:
+			continue
+
+		# Pas trop proche du spawn
+		if pos.distance_to(SPAWN_POS) < MIN_DISTANCE_CHEST_FROM_SPAWN:
+			continue
+
+		# ❌ Éviter les coffres collés entre eux
+		var too_close = false
+		for other in used_positions:
+			if pos.distance_to(other) < 6:  # distance minimale entre coffres
+				too_close = true
+				break
+
+		if too_close:
+			continue
+
+		# ❌ Éviter murs proches (plus joli)
+		var near_wall = false
+		for dx in range(-1, 2):
+			for dy in range(-1, 2):
+				if not in_bounds(x + dx, y + dy):
+					continue
+				if not grid[x + dx][y + dy]:
+					near_wall = true
+
+		if near_wall:
+			continue
+
+		# -------------------------
+		# SPAWN
+		# -------------------------
+		var chest = CHEST_SCENE.instantiate()
+		var world_pos = map_to_local(pos) + Vector2(8, 8)
+		chest.position = world_pos
+
+		add_child(chest)
+
+		used_positions.append(pos)
+		spawned += 1
+
+	print("Coffres spawn:", spawned)
+
+# -------------------------
+# CONNECTIVITÉ
+# -------------------------
+func keep_connected_area(grid):
+	var visited = {}
+	var stack = [SPAWN_POS]
+
+	while stack.size() > 0:
+		var current = stack.pop_back()
+
+		if visited.has(current):
+			continue
+
+		visited[current] = true
+
+		var dirs = [
+			Vector2i(1, 0),
+			Vector2i(-1, 0),
+			Vector2i(0, 1),
+			Vector2i(0, -1)
+		]
+
+		for d in dirs:
+			var nx = current.x + d.x
+			var ny = current.y + d.y
+
+			if in_bounds(nx, ny) and grid[nx][ny]:
+				stack.append(Vector2i(nx, ny))
+
+	# Supprimer zones isolées
+	for x in range(SIZE.x):
+		for y in range(SIZE.y):
+			var pos = Vector2i(x, y)
+			if grid[x][y] and not visited.has(pos):
+				grid[x][y] = false
+
+	return grid
+
+# -------------------------
+# SPAWN MONSTRES
 # -------------------------
 func spawn_monsters(grid):
 	var spawned = 0
@@ -94,7 +210,6 @@ func spawn_monsters(grid):
 		var y = randi() % SIZE.y
 		var pos = Vector2i(x, y)
 
-		# Conditions de spawn
 		if not grid[x][y]:
 			continue
 
@@ -104,9 +219,7 @@ func spawn_monsters(grid):
 		if used_positions.has(pos):
 			continue
 
-		# Instanciation
 		var monster = MONSTER_SCENE.instantiate()
-
 		var world_pos = map_to_local(pos) + Vector2(8, 8)
 		monster.position = world_pos
 

@@ -6,6 +6,8 @@ extends CharacterBody2D
 @onready var hitbox: Area2D = $Direction/Hitbox
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var health_bar: ProgressBar = $HealthBar
+@onready var coin_sound: AudioStreamPlayer2D = $CoinSound  
+
 
 # -------------------------
 # STATS
@@ -198,6 +200,35 @@ func take_damage(amount: int, source_position: Vector2):
 func add_coin(amount: int):
 	coins += amount
 	print("Coins:", coins)
+
+	if coin_sound:
+		coin_sound.play()
+	
+	show_floating_text("+" + str(amount))
+
+# -------------------------
+# Affiche le nombre de pièce gagné
+# -------------------------
+func show_floating_text(text: String):
+	var label = Label.new()
+	label.text = text
+
+	# Style
+	label.modulate = Color(1, 0.9, 0.2) # jaune
+	label.add_theme_font_size_override("font_size", 16)
+
+	add_child(label)
+
+	# Position au-dessus du joueur
+	label.position = Vector2(0, -20)
+
+	# Animation
+	var tween = create_tween()
+	tween.tween_property(label, "position:y", label.position.y - 30, 0.6)
+	tween.tween_property(label, "modulate:a", 0.0, 0.6)
+
+	await tween.finished
+	label.queue_free()
 
 # -------------------------
 # MORT

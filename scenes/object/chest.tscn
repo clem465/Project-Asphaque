@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://cv04nf55qt8tp"]
+
+[ext_resource type="Texture2D" uid="uid://cu2rw7c831w30" path="res://assets/tilesets/0x72_DungeonTilesetII_v1.7.png" id="1_pns3v"]
+[ext_resource type="Script" uid="uid://b6mnifuofusd8" path="res://scripts/object/chest.gd" id="2_kcd6m"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kcd6m"]
+atlas = ExtResource("1_pns3v")
+region = Rect2(304, 400, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3h44x"]
+atlas = ExtResource("1_pns3v")
+region = Rect2(304, 400, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xi486"]
+atlas = ExtResource("1_pns3v")
+region = Rect2(320, 400, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3lno7"]
+atlas = ExtResource("1_pns3v")
+region = Rect2(336, 400, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ekktq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kcd6m")
+}],
+"loop": true,
+"name": &"default",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3h44x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xi486")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3lno7")
+}],
+"loop": false,
+"name": &"open_anim",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3h44x"]
+size = Vector2(16.000008, 14.00001)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xi486"]
+radius = 24.33105
+
+[node name="Chest" type="Node2D" unique_id=1512561655]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=723429090]
+sprite_frames = SubResource("SpriteFrames_ekktq")
+autoplay = "default"
+
+[node name="CollisionBody" type="StaticBody2D" parent="." unique_id=1510756540]
+scale = Vector2(0.99999994, 0.99999994)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionBody" unique_id=104401760]
+position = Vector2(0, 1.0000024)
+scale = Vector2(0.99999964, 0.99999964)
+shape = SubResource("RectangleShape2D_3h44x")
+
+[node name="InteractionArea" type="Area2D" parent="." unique_id=1763756071]
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("2_kcd6m")
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=488441587]
+shape = SubResource("CircleShape2D_xi486")
