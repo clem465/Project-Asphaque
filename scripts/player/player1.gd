@@ -23,6 +23,8 @@ var input_vector := Vector2.ZERO
 var last_direction := "down"
 var is_attacking := false
 var attack_enabled := true
+var _base_speed: float = 0.0
+var _speed_boost_active: bool = false
 
 var hitbox_offset := Vector2.ZERO
 var already_hit: Array = []
@@ -34,6 +36,7 @@ func _ready() -> void:
 	add_to_group("player")
 
 	health = max_health
+	_base_speed = speed
 	hitbox_offset = hitbox.position
 
 	# UI
@@ -65,6 +68,10 @@ func _unhandled_input(_event: InputEvent) -> void:
 
 	if Input.is_action_just_pressed("attack") and attack_enabled and not is_attacking:
 		_attack()
+
+	if Input.is_action_just_pressed("use_assigned_item"):
+		if GameState.has_method("use_assigned_action_item"):
+			GameState.use_assigned_action_item(self)
 
 # -------------------------
 # PHYSICS
@@ -180,6 +187,7 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 # DAMAGE
 # -------------------------
 func take_damage(amount: int, source_position: Vector2):
+	_clear_speed_boost()
 
 	var damage: int = maxi(amount - defense, 1)
 	health -= damage
@@ -194,6 +202,33 @@ func take_damage(amount: int, source_position: Vector2):
 
 	if health <= 0:
 		die()
+
+
+func heal(amount: int) -> void:
+	if amount <= 0:
+		return
+
+	health = mini(health + amount, max_health)
+	health_bar.value = health
+
+
+func apply_speed_boost(multiplier: float = 1.5) -> void:
+	if multiplier <= 1.0:
+		multiplier = 1.5
+
+	if not _speed_boost_active:
+		_base_speed = speed
+
+	speed = _base_speed * multiplier
+	_speed_boost_active = true
+
+
+func _clear_speed_boost() -> void:
+	if not _speed_boost_active:
+		return
+
+	speed = _base_speed
+	_speed_boost_active = false
 
 # -------------------------
 # Ajouté pièce

@@ -209,6 +209,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = 30.0
 
+[node name="InventoryVBox" type="VBoxContainer" parent="InventoryWindow/Content"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+
 [node name="ResizeHandle" type="ColorRect" parent="InventoryWindow" node_paths=PackedStringArray("target_window")]
 layout_mode = 1
 anchor_left = 1.0
@@ -224,10 +234,14 @@ mouse_filter = 0
 script = ExtResource("4_resize")
 target_window = NodePath("..")
 
-[node name="InventoryPlaceholder" type="Label" parent="InventoryWindow/Content"]
+[node name="InventoryPlaceholder" type="Label" parent="InventoryWindow/Content/InventoryVBox"]
 text = "Coins: 0"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ItemsList" type="VBoxContainer" parent="InventoryWindow/Content/InventoryVBox"]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="StatsWindow" type="Panel" parent="."]
 visible = false
@@ -395,7 +409,8 @@ button_pressed = true
 text = "Attack: ON"
 
 [node name="Action2" type="Button" parent="ActionsWindow/Content/ActionsVBox"]
-text = "Action 2"
+toggle_mode = true
+text = "Potion Slot (R): OFF"
 
 [node name="Action3" type="Button" parent="ActionsWindow/Content/ActionsVBox"]
 text = "Action 3"

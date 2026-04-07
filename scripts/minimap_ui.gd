@@ -28,12 +28,14 @@ extends CanvasLayer
 @onready var stats_opacity_slider: HSlider = $StatsWindow/TitleBar/Header/OpacitySlider
 @onready var actions_opacity_slider: HSlider = $ActionsWindow/TitleBar/Header/OpacitySlider
 @onready var fog_overlay: TextureRect = $MinimapWindow/MapContainer/FogOverlay
-@onready var inventory_placeholder: Label = $InventoryWindow/Content/InventoryPlaceholder
+@onready var inventory_placeholder: Label = $InventoryWindow/Content/InventoryVBox/InventoryPlaceholder
+@onready var inventory_items_list: VBoxContainer = $InventoryWindow/Content/InventoryVBox/ItemsList
 @onready var hp_label: Label = $StatsWindow/Content/StatsVBox/HpLabel
 @onready var hp_bar: ProgressBar = $StatsWindow/Content/StatsVBox/HpBar
 @onready var atk_label: Label = $StatsWindow/Content/StatsVBox/AtkLabel
 @onready var def_label: Label = $StatsWindow/Content/StatsVBox/DefLabel
 @onready var attack_toggle_button: Button = $ActionsWindow/Content/ActionsVBox/Action1
+@onready var item_slot_toggle_button: Button = $ActionsWindow/Content/ActionsVBox/Action2
 
 var _map_bounds: Rect2 = Rect2()
 var _fog_grid_size: Vector2i = Vector2i.ZERO
@@ -47,6 +49,9 @@ var _has_last_player_pos: bool = false
 var _fog_ready: bool = false
 var _fog_enabled_for_scene: bool = true
 var _is_syncing_attack_toggle: bool = false
+var _is_syncing_item_slot_toggle: bool = false
+var _action_item_id: String = "healing_potion"
+var _last_inventory_signature: String = ""
 
 func _ready() -> void:
 	_disable_button_keyboard_focus(self)
@@ -100,6 +105,10 @@ func _ready() -> void:
 		attack_toggle_button.toggled.connect(_on_attack_toggle_toggled)
 		_update_attack_toggle_text(attack_toggle_button.button_pressed)
 
+	if item_slot_toggle_button:
+		item_slot_toggle_button.toggled.connect(_on_item_slot_toggle_toggled)
+		_update_item_slot_toggle_text(item_slot_toggle_button.button_pressed)
+
 	if map_viewport:
 		map_viewport.world_2d = get_viewport().world_2d
 	
@@ -111,6 +120,7 @@ func _ready() -> void:
 
 	call_deferred("_center_map")
 	call_deferred("_sync_attack_toggle_from_player")
+	call_deferred("_sync_item_slot_toggle_from_state")
 
 func _disable_button_keyboard_focus(node: Node) -> void:
 	if node is Button:
@@ -121,6 +131,8 @@ func _disable_button_keyboard_focus(node: Node) -> void:
 
 func _process(_delta: float) -> void:
 	_update_player_panels()
+	_refresh_inventory_items_ui()
+	_sync_item_slot_toggle_from_state()
 
 	if not _fog_enabled_for_scene or not _fog_ready:
 		return
@@ -206,9 +218,35 @@ func _on_attack_toggle_toggled(enabled: bool) -> void:
 
 	_update_attack_toggle_text(enabled)
 
+func _on_item_slot_toggle_toggled(enabled: bool) -> void:
+	if _is_syncing_item_slot_toggle:
+		return
+
+	if GameState.has_method("toggle_assigned_action_item"):
+		if enabled:
+			GameState.set_assigned_action_item(_action_item_id)
+		else:
+			if GameState.get_assigned_action_item() == _action_item_id:
+				GameState.set_assigned_action_item("")
+
+	_sync_item_slot_toggle_from_state()
+
 func _update_attack_toggle_text(enabled: bool) -> void:
 	if attack_toggle_button:
 		attack_toggle_button.text = "Attack: ON" if enabled else "Attack: OFF"
+
+func _update_item_slot_toggle_text(enabled: bool) -> void:
+	if item_slot_toggle_button == null:
+		return
+
+	var count: int = 0
+	if GameState.has_method("get_item_count"):
+		count = int(GameState.get_item_count(_action_item_id))
+
+	if enabled:
+		item_slot_toggle_button.text = "Potion Slot (R): ON x%d" % count
+	else:
+		item_slot_toggle_button.text = "Potion Slot (R): OFF x%d" % count
 
 func _sync_attack_toggle_from_player() -> void:
 	var player: Node2D = _get_player_ref()
@@ -228,7 +266,134 @@ func _sync_attack_toggle_from_player() -> void:
 	_is_syncing_attack_toggle = false
 	_update_attack_toggle_text(enabled)
 
+func _sync_item_slot_toggle_from_state() -> void:
+	if item_slot_toggle_button == null:
+		return
+
+	var assigned_item: String = ""
+	if GameState.has_method("get_assigned_action_item"):
+		assigned_item = String(GameState.get_assigned_action_item())
+
+	var has_item: bool = true
+	if GameState.has_method("get_item_count"):
+		has_item = int(GameState.get_item_count(_action_item_id)) > 0
+
+	var enabled: bool = assigned_item == _action_item_id and has_item
+
+	_is_syncing_item_slot_toggle = true
+	item_slot_toggle_button.set_pressed_no_signal(enabled)
+	_is_syncing_item_slot_toggle = false
+	item_slot_toggle_button.disabled = not has_item
+	_update_item_slot_toggle_text(enabled)
+
+func _refresh_inventory_items_ui() -> void:
+	if inventory_items_list == null:
+		return
+
+	if not GameState.has_method("get_inventory_counts"):
+		return
+
+	var counts: Dictionary = GameState.get_inventory_counts()
+	var signature: String = _build_inventory_signature(counts)
+	if signature == _last_inventory_signature:
+		return
+
+	_last_inventory_signature = signature
+
+	for child in inventory_items_list.get_children():
+		child.queue_free()
+
+	if counts.is_empty():
+		var empty_label: Label = Label.new()
+		empty_label.text = "(No items)"
+		inventory_items_list.add_child(empty_label)
+		return
+
+	var assigned_item: String = ""
+	if GameState.has_method("get_assigned_action_item"):
+		assigned_item = String(GameState.get_assigned_action_item())
+
+	for item_id_variant in counts.keys():
+		var item_id: String = String(item_id_variant)
+		var count: int = int(counts[item_id])
+		if count <= 0:
+			continue
+
+		var row: HBoxContainer = HBoxContainer.new()
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+		var item_name: String = item_id
+		if GameState.has_method("get_item_display_name"):
+			item_name = String(GameState.get_item_display_name(item_id))
+
+		var item_label: Label = Label.new()
+		item_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		item_label.text = "%s x%d" % [item_name, count]
+		row.add_child(item_label)
+
+		var slot_button: Button = Button.new()
+		slot_button.focus_mode = Control.FOCUS_NONE
+		slot_button.text = "R: ON" if assigned_item == item_id else "R: OFF"
+		slot_button.pressed.connect(_on_inventory_slot_toggle_pressed.bind(item_id))
+		row.add_child(slot_button)
+
+		var use_button: Button = Button.new()
+		use_button.text = "Use"
+		use_button.focus_mode = Control.FOCUS_NONE
+		use_button.pressed.connect(_on_inventory_use_pressed.bind(item_id))
+		row.add_child(use_button)
+
+		inventory_items_list.add_child(row)
+
+func _build_inventory_signature(counts: Dictionary) -> String:
+	if counts.is_empty():
+		var assigned_empty: String = ""
+		if GameState.has_method("get_assigned_action_item"):
+			assigned_empty = String(GameState.get_assigned_action_item())
+		return "@assigned:%s" % assigned_empty
+
+	var keys: Array = counts.keys()
+	keys.sort()
+
+	var parts := PackedStringArray()
+	for key_variant in keys:
+		var key: String = String(key_variant)
+		parts.append("%s:%d" % [key, int(counts[key])])
+
+	var assigned_item: String = ""
+	if GameState.has_method("get_assigned_action_item"):
+		assigned_item = String(GameState.get_assigned_action_item())
+	parts.append("@assigned:%s" % assigned_item)
+
+	return "|".join(parts)
+
+func _on_inventory_slot_toggle_pressed(item_id: String) -> void:
+	if not GameState.has_method("get_assigned_action_item") or not GameState.has_method("set_assigned_action_item"):
+		return
+
+	var current: String = String(GameState.get_assigned_action_item())
+	if current == item_id:
+		GameState.set_assigned_action_item("")
+	else:
+		GameState.set_assigned_action_item(item_id)
+
+	_last_inventory_signature = "__dirty__"
+	_sync_item_slot_toggle_from_state()
+
+func _on_inventory_use_pressed(item_id: String) -> void:
+	var player: Node2D = _get_player_ref()
+	if player == null:
+		return
+
+	if GameState.has_method("use_item"):
+		GameState.use_item(item_id, player)
+		_last_inventory_signature = "__dirty__"
+
 func _update_player_panels() -> void:
+	var coins: int = int(GameState.gold)
+	if inventory_placeholder:
+		inventory_placeholder.text = "Coins: %d" % coins
+
 	var player: Node2D = _get_player_ref()
 	if player == null:
 		return
@@ -237,7 +402,6 @@ func _update_player_panels() -> void:
 	var max_hp: int = max(1, _read_player_int(player, "get_max_health", "max_health", 1))
 	var atk: int = _read_player_int(player, "get_attack_value", "attack_damage", 0)
 	var defense: int = _read_player_int(player, "get_defense_value", "defense", 0)
-	var coins: int = _read_player_int(player, "get_coins", "coins", 0)
 
 	if hp_label:
 		hp_label.text = "HP: %d / %d" % [current_hp, max_hp]
@@ -251,9 +415,6 @@ func _update_player_panels() -> void:
 
 	if def_label:
 		def_label.text = "DEF: %d" % defense
-
-	if inventory_placeholder:
-		inventory_placeholder.text = "Coins: %d" % coins
 
 	_sync_attack_toggle_from_player()
 
