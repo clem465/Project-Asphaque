@@ -956,6 +956,7 @@ limit_smoothed = true
 [node name="MinimapUI" parent="Player1" unique_id=1175049167 instance=ExtResource("5_p3qwm")]
 
 [node name="HealthBar" type="ProgressBar" parent="Player1" unique_id=1191022679]
+visibility_layer = 2
 offset_left = -368.31686
 offset_top = -196.0396
 offset_right = -233.48508

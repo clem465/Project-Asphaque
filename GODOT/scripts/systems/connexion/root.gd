@@ -7,15 +7,10 @@ extends Control
 @onready var loader = $loader
 @onready var anim = $AnimationPlayer
 
-const DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
-
-var api_url = ""
+var api_url = "http://localhost:8000/login"
 
 
 func _ready():
-	api_url = "%s/login" % _resolve_api_base_url()
-	print("Legacy login API URL:", api_url)
-
 	# Connexions des boutons
 	$VBoxContainer/login_button.pressed.connect(_on_login_pressed)
 	$VBoxContainer/register_button.pressed.connect(_on_register_pressed)
@@ -31,20 +26,7 @@ func _ready():
 	var token = load_token()
 	if token != null and token != "":
 		print("Auto connecté !")
-		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
-
-
-func _resolve_api_base_url() -> String:
-	if OS.has_feature("web") and Engine.has_singleton("JavaScriptBridge"):
-		var window = JavaScriptBridge.get_interface("window")
-		if window and window.location:
-			var params = JavaScriptBridge.create_object("URLSearchParams", window.location.search)
-			if params and params.has("api"):
-				var custom_api = String(params.get("api")).strip_edges()
-				if custom_api != "":
-					return custom_api.trim_suffix("/")
-
-	return DEFAULT_API_BASE_URL
+		get_tree().change_scene_to_file("res://MainMenu.tscn")
 
 
 # 🔐 LOGIN
@@ -90,12 +72,10 @@ func _on_request_completed(result, response_code, headers, body):
 
 		save_token(token)
 
-		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+		get_tree().change_scene_to_file("res://MainMenu.tscn")
 	else:
 		if response.has("error"):
 			error_label.text = response["error"]
-		elif response.has("detail"):
-			error_label.text = str(response["detail"])
 		else:
 			error_label.text = "Email ou mot de passe incorrect"
 
