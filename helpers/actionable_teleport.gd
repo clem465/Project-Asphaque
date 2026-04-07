@@ -45,4 +45,7 @@ func check_choice():
 
 
 func teleport():
+	if GameState.saved_gold == 0:
+		# 💾 sauvegarder les coins AVANT le donjon
+		GameState.save_gold()
 	get_tree().change_scene_to_file(target_scene)

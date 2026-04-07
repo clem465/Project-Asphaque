@@ -517,6 +517,11 @@ animations = [{
 "name": &"attack_up",
 "speed": 10.0
 }, {
+"frames": [],
+"loop": true,
+"name": &"die",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_g2els")
@@ -767,7 +772,7 @@ script = ExtResource("1_mod63")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=218171934]
 sprite_frames = SubResource("SpriteFrames_y4r1p")
-animation = &"idle_down"
+animation = &"die"
 autoplay = "idle_down"
 metadata/_edit_lock_ = true
 

@@ -306,4 +306,9 @@ func show_floating_text(text: String):
 # -------------------------
 func die():
 	print("💀 Player mort")
-	queue_free()
+
+	# 🔁 restaurer les coins
+	GameState.restore_gold()
+
+	# 🔄 retour village
+	get_tree().change_scene_to_file("res://maps/village.tscn")

@@ -122,16 +122,24 @@ func _try_attack():
 	_attack()
 
 func _attack():
+	if not is_inside_tree():
+		return
+
 	is_attacking = true
 	can_attack = false
 	velocity = Vector2.ZERO
 
 	anim.play("attack_" + last_dir)
 
-	if target.has_method("take_damage"):
+	if target and is_instance_valid(target) and target.has_method("take_damage"):
 		target.take_damage(attack, global_position)
 
-	await get_tree().create_timer(attack_cooldown).timeout
+	var tree := get_tree()
+	if tree:
+		await tree.create_timer(attack_cooldown).timeout
+
+	if not is_inside_tree():
+		return
 
 	is_attacking = false
 	can_attack = true

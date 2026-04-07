@@ -1,6 +1,7 @@
 extends Node
 
 var gold := 100
+var saved_gold := 0
 var inventory := []
 var inventory_counts: Dictionary = {}
 var assigned_action_item: String = ""
@@ -237,3 +238,12 @@ func _add_kills_to_quest(quest_id: String, amount: int) -> void:
 	quests[quest_id] = quest
 
 	print("Progression quete ", quest.get("title", quest_id), ": ", current, "/", target)
+
+func save_gold():
+	saved_gold = gold
+	print("💾 Gold sauvegardé :", saved_gold)
+
+
+func restore_gold():
+	gold = saved_gold
+	print("🔁 Gold restauré :", gold)

@@ -43,6 +43,9 @@ func _on_dialogue_finished():
 func teleport():
 	if target_scene == "":
 		return
+	
+	# 💾 sauvegarde AVANT de quitter le donjon
+	GameState.save_gold()
 
 	get_tree().change_scene_to_file(target_scene)
 
