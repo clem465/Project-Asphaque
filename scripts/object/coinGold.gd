@@ -4,6 +4,8 @@ extends Node2D
 @export var acceleration := 20.0
 @export var stop_distance := 5.0
 
+@onready var collect_sound = $collect_sound
+
 var velocity := Vector2.ZERO
 var target: Node2D = null
 
@@ -14,8 +16,8 @@ enum State {
 
 var state := State.IDLE
 
-func _physics_process(delta):
 
+func _physics_process(delta):
 	match state:
 		State.IDLE:
 			velocity = velocity.move_toward(Vector2.ZERO, 500 * delta)
@@ -27,11 +29,11 @@ func _physics_process(delta):
 
 
 # -------------------------
-# CHASE (repris du slime)
+# CHASE
 # -------------------------
 func _chase(delta):
-
 	if not is_instance_valid(target):
+		print("⚠️ Target invalide → retour IDLE")
 		state = State.IDLE
 		return
 
@@ -46,11 +48,20 @@ func _chase(delta):
 
 
 # -------------------------
-# COLLECTq
+# COLLECT
 # -------------------------
 func _collect():
+	print("🪙 Coin collecté")
+
 	if target and target.has_method("add_coin"):
 		target.add_coin(1)
+
+	# 🔊 jouer le son
+	if collect_sound:
+		collect_sound.pitch_scale = randf_range(0.9, 1.1)
+		collect_sound.play()
+		await collect_sound.finished
+
 	queue_free()
 
 
@@ -59,5 +70,6 @@ func _collect():
 # -------------------------
 func _on_area_2d_body_entered(body):
 	if body.is_in_group("player"):
+		print("👤 Player détecté → CHASE")
 		target = body
 		state = State.CHASE

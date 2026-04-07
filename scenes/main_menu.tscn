@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://broc7kld6amm7"]
+
+[ext_resource type="Script" uid="uid://b6ydadudd5qcv" path="res://scripts/main_menu.gd" id="1_l6cm7"]
+
+[node name="MainMenu" type="Control" unique_id=12469421]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 472.0
+offset_top = 181.0
+offset_right = 472.0
+offset_bottom = 181.0
+script = ExtResource("1_l6cm7")
+
+[node name="Title" type="Label" parent="." unique_id=1406937625]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 3.0
+offset_right = 107.0
+offset_bottom = 26.0
+text = "Connexion"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=604466457]
+layout_mode = 0
+offset_top = 29.0
+offset_right = 138.0
+offset_bottom = 227.0
+
+[node name="email_input" type="LineEdit" parent="VBoxContainer" unique_id=1757670416]
+layout_mode = 2
+placeholder_text = "Email"
+
+[node name="username_input" type="LineEdit" parent="VBoxContainer" unique_id=102373155]
+layout_mode = 2
+
+[node name="password_input" type="LineEdit" parent="VBoxContainer" unique_id=625663247]
+layout_mode = 2
+placeholder_text = "Mot de passe"
+secret = true
+
+[node name="login_button" type="Button" parent="VBoxContainer" unique_id=1048037538]
+layout_mode = 2
+text = "Se connecter"
+
+[node name="register_button" type="Button" parent="VBoxContainer" unique_id=872019848]
+layout_mode = 2
+text = "Créer un compte"
+
+[node name="error_label" type="Label" parent="VBoxContainer" unique_id=369158248]
+modulate = Color(0.81832296, 0.25643492, 0.025527973, 1)
+layout_mode = 2
+text = "\""
+
+[node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=2007644714]
+
+[node name="loader" type="TextureRect" parent="." unique_id=1167940163]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0

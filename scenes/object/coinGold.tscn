@@ -1,16 +1,17 @@
 [gd_scene format=3 uid="uid://vq12pelks1ko"]
 
 [ext_resource type="Script" uid="uid://8af20a3u18wd" path="res://scripts/object/coinGold.gd" id="1_j35u3"]
-[ext_resource type="Texture2D" uid="uid://duu6tghn4jbm2" path="res://assets/object/Coin/Gold/Gold_1.png" id="2_gpiw6"]
-[ext_resource type="Texture2D" uid="uid://bmvqans2pdke4" path="res://assets/object/Coin/Gold/Gold_2.png" id="3_dfk8l"]
-[ext_resource type="Texture2D" uid="uid://cqauhekvwe450" path="res://assets/object/Coin/Gold/Gold_3.png" id="4_lonsn"]
-[ext_resource type="Texture2D" uid="uid://bvo3dctj2htwd" path="res://assets/object/Coin/Gold/Gold_4.png" id="5_bg3e3"]
-[ext_resource type="Texture2D" uid="uid://bon0pofa24yi" path="res://assets/object/Coin/Gold/Gold_5.png" id="6_03gh8"]
-[ext_resource type="Texture2D" uid="uid://t2k8he5dq4rs" path="res://assets/object/Coin/Gold/Gold_6.png" id="7_brdsu"]
-[ext_resource type="Texture2D" uid="uid://dns3nyyg0qhjs" path="res://assets/object/Coin/Gold/Gold_7.png" id="8_5o43t"]
-[ext_resource type="Texture2D" uid="uid://7xda4vr7jhm" path="res://assets/object/Coin/Gold/Gold_8.png" id="9_stfmh"]
-[ext_resource type="Texture2D" uid="uid://btqhc5vx3g4np" path="res://assets/object/Coin/Gold/Gold_9.png" id="10_kooon"]
-[ext_resource type="Texture2D" uid="uid://b1hc2ymey64qa" path="res://assets/object/Coin/Gold/Gold_10.png" id="11_51ukq"]
+[ext_resource type="Texture2D" uid="uid://duu6tghn4jbm2" path="res://assets/object/PNG/Gold/Gold_1.png" id="2_gpiw6"]
+[ext_resource type="Texture2D" uid="uid://bmvqans2pdke4" path="res://assets/object/PNG/Gold/Gold_2.png" id="3_dfk8l"]
+[ext_resource type="Texture2D" uid="uid://cqauhekvwe450" path="res://assets/object/PNG/Gold/Gold_3.png" id="4_lonsn"]
+[ext_resource type="Texture2D" uid="uid://bvo3dctj2htwd" path="res://assets/object/PNG/Gold/Gold_4.png" id="5_bg3e3"]
+[ext_resource type="Texture2D" uid="uid://bon0pofa24yi" path="res://assets/object/PNG/Gold/Gold_5.png" id="6_03gh8"]
+[ext_resource type="Texture2D" uid="uid://t2k8he5dq4rs" path="res://assets/object/PNG/Gold/Gold_6.png" id="7_brdsu"]
+[ext_resource type="Texture2D" uid="uid://dns3nyyg0qhjs" path="res://assets/object/PNG/Gold/Gold_7.png" id="8_5o43t"]
+[ext_resource type="Texture2D" uid="uid://7xda4vr7jhm" path="res://assets/object/PNG/Gold/Gold_8.png" id="9_stfmh"]
+[ext_resource type="Texture2D" uid="uid://btqhc5vx3g4np" path="res://assets/object/PNG/Gold/Gold_9.png" id="10_kooon"]
+[ext_resource type="Texture2D" uid="uid://b1hc2ymey64qa" path="res://assets/object/PNG/Gold/Gold_10.png" id="11_51ukq"]
+[ext_resource type="AudioStream" uid="uid://bf7ud0ofh78y1" path="res://assets/audio/sounds/object/super-mario-coin-sound.mp3" id="12_gpiw6"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_07tfl"]
 animations = [{
@@ -68,5 +69,8 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=492080532]
 visibility_layer = 2
 shape = SubResource("CircleShape2D_emasv")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=401847544]
+stream = ExtResource("12_gpiw6")
 
 [connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

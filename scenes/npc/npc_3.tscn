@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://bx2l7bx575cpn" path="res://assets/npc/NPC_Characters_v1.0/Male3.png" id="1_g644d"]
 [ext_resource type="PackedScene" uid="uid://bhho1kj35s4cp" path="res://helpers/actionable.tscn" id="2_lgra0"]
 [ext_resource type="Script" uid="uid://cvfpppb6lgjvh" path="res://scripts/npc/npc_3.gd" id="3_ji2ix"]
+[ext_resource type="Resource" uid="uid://bsrjuo7o1jyxt" path="res://dialogue/questgiver.dialogue" id="4_qn4q8"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g644d"]
 atlas = ExtResource("1_g644d")
@@ -62,6 +63,8 @@ shape = SubResource("RectangleShape2D_p4nnn")
 
 [node name="Actionable" parent="." unique_id=130623042 instance=ExtResource("2_lgra0")]
 script = ExtResource("3_ji2ix")
+dialogue_resource = ExtResource("4_qn4q8")
+quest_id = "slime_cleanup"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Actionable" unique_id=1177984130]
 position = Vector2(1, 0)

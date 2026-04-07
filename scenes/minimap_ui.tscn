@@ -145,6 +145,15 @@ target_window = NodePath("..")
 handle_input_locally = false
 size = Vector2i(400, 370)
 
+[node name="FogOverlay" type="TextureRect" parent="MinimapWindow/MapContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
 [node name="MapCamera" type="Camera2D" parent="MinimapWindow/MapContainer/MapViewport"]
 zoom = Vector2(0.8, 0.8)
 
@@ -200,6 +209,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = 30.0
 
+[node name="InventoryVBox" type="VBoxContainer" parent="InventoryWindow/Content"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+
 [node name="ResizeHandle" type="ColorRect" parent="InventoryWindow" node_paths=PackedStringArray("target_window")]
 layout_mode = 1
 anchor_left = 1.0
@@ -215,10 +234,14 @@ mouse_filter = 0
 script = ExtResource("4_resize")
 target_window = NodePath("..")
 
-[node name="InventoryPlaceholder" type="Label" parent="InventoryWindow/Content"]
-text = "(Inventaire vide)"
+[node name="InventoryPlaceholder" type="Label" parent="InventoryWindow/Content/InventoryVBox"]
+text = "Coins: 0"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ItemsList" type="VBoxContainer" parent="InventoryWindow/Content/InventoryVBox"]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="StatsWindow" type="Panel" parent="."]
 visible = false
@@ -294,13 +317,18 @@ offset_right = -8.0
 offset_bottom = -8.0
 
 [node name="HpLabel" type="Label" parent="StatsWindow/Content/StatsVBox"]
-text = "HP: 100"
+text = "HP: 0 / 0"
+
+[node name="HpBar" type="ProgressBar" parent="StatsWindow/Content/StatsVBox"]
+custom_minimum_size = Vector2(0, 18)
+show_percentage = false
+value = 100.0
 
 [node name="AtkLabel" type="Label" parent="StatsWindow/Content/StatsVBox"]
-text = "ATK: 12"
+text = "ATK: 0"
 
 [node name="DefLabel" type="Label" parent="StatsWindow/Content/StatsVBox"]
-text = "DEF: 8"
+text = "DEF: 0"
 
 [node name="ActionsWindow" type="Panel" parent="."]
 visible = false
@@ -376,10 +404,13 @@ offset_right = -8.0
 offset_bottom = -8.0
 
 [node name="Action1" type="Button" parent="ActionsWindow/Content/ActionsVBox"]
-text = "Action 1"
+toggle_mode = true
+button_pressed = true
+text = "Attack: ON"
 
 [node name="Action2" type="Button" parent="ActionsWindow/Content/ActionsVBox"]
-text = "Action 2"
+toggle_mode = true
+text = "Potion Slot (R): OFF"
 
 [node name="Action3" type="Button" parent="ActionsWindow/Content/ActionsVBox"]
 text = "Action 3"
