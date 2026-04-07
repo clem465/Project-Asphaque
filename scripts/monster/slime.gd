@@ -3,6 +3,7 @@ extends CharacterBody2D
 @export var speed := 40.0
 @export var acceleration := 200.0
 @export var friction := 300.0
+@export var coin_drop_scene: PackedScene = preload("res://scenes/object/coinGold.tscn")
 
 @export var stop_distance := 20.0
 @export var attack_cooldown := 1.0
@@ -232,8 +233,24 @@ func die():
 	if GameState.has_method("add_kill"):
 		GameState.add_kill("slime")
 
+	_spawn_coin_drop()
+
 	# supprimer le slime
 	queue_free()
+
+func _spawn_coin_drop() -> void:
+	if coin_drop_scene == null:
+		return
+
+	var root: Node = get_tree().current_scene
+	if root == null:
+		return
+
+	var coin_instance: Node = coin_drop_scene.instantiate()
+	root.add_child(coin_instance)
+
+	if coin_instance is Node2D:
+		(coin_instance as Node2D).global_position = global_position
 
 # -------------------------
 # ANIMATION

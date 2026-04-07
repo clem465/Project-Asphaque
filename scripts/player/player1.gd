@@ -16,14 +16,13 @@ extends CharacterBody2D
 
 var health := 0
 
-var coins := 0
-
 # -------------------------
 # ÉTAT
 # -------------------------
 var input_vector := Vector2.ZERO
 var last_direction := "down"
 var is_attacking := false
+var attack_enabled := true
 
 var hitbox_offset := Vector2.ZERO
 var already_hit: Array = []
@@ -55,7 +54,7 @@ func _ready() -> void:
 # -------------------------
 # INPUT
 # -------------------------
-func _unhandled_input(event: InputEvent) -> void:
+func _unhandled_input(_event: InputEvent) -> void:
 
 	if Input.is_action_just_pressed("interact"):
 		var actionables = actionable_finder.get_overlapping_areas()
@@ -64,7 +63,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if target.has_method("action"):
 				target.action()
 
-	if Input.is_action_just_pressed("attack") and not is_attacking:
+	if Input.is_action_just_pressed("attack") and attack_enabled and not is_attacking:
 		_attack()
 
 # -------------------------
@@ -147,6 +146,9 @@ func _update_hitbox_position() -> void:
 # ATTAQUE
 # -------------------------
 func _attack() -> void:
+	if not attack_enabled:
+		return
+
 	is_attacking = true
 	already_hit.clear()
 
@@ -179,7 +181,7 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 # -------------------------
 func take_damage(amount: int, source_position: Vector2):
 
-	var damage = max(amount - defense, 1)
+	var damage: int = maxi(amount - defense, 1)
 	health -= damage
 
 	health_bar.value = health
@@ -187,7 +189,7 @@ func take_damage(amount: int, source_position: Vector2):
 	print("Player prend", damage, "dégâts | Vie:", health)
 
 	# knockback propre
-	var dir = (global_position - source_position).normalized()
+	var dir: Vector2 = (global_position - source_position).normalized()
 	velocity += dir * 150
 
 	if health <= 0:
@@ -197,8 +199,39 @@ func take_damage(amount: int, source_position: Vector2):
 # Ajouté pièce
 # -------------------------
 func add_coin(amount: int):
-	coins += amount
-	print("Coins:", coins)
+	if amount <= 0:
+		return
+
+	GameState.gold += amount
+	print("Coins:", GameState.gold)
+
+
+func set_attack_enabled(enabled: bool) -> void:
+	attack_enabled = enabled
+
+
+func is_attack_enabled() -> bool:
+	return attack_enabled
+
+
+func get_coins() -> int:
+	return int(GameState.gold)
+
+
+func get_current_health() -> int:
+	return health
+
+
+func get_max_health() -> int:
+	return max_health
+
+
+func get_attack_value() -> int:
+	return attack
+
+
+func get_defense_value() -> int:
+	return defense
 
 # -------------------------
 # MORT

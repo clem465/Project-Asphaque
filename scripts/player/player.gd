@@ -1,7 +1,9 @@
 extends CharacterBody2D
 
 @export var speed: float = 80.0
+@export var max_health: int = 25
 @export var attack_damage: int = 10
+@export var defense: int = 3
 @export var attack_range: float = 34.0
 @export var attack_cooldown: float = 0.2
 @export var attack_facing_dot_threshold: float = 0.2
@@ -10,9 +12,17 @@ extends CharacterBody2D
 var input_vector := Vector2.ZERO
 var last_direction := "down"
 var is_attacking := false
+var attack_enabled := true
+
+var health := 0
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _ready() -> void:
+	add_to_group("player")
+	health = max_health
+
+
+func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("interact"):
 		var actionables = actionable_finder.get_overlapping_areas()
 		
@@ -22,11 +32,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			if target.has_method("action"):
 				target.action()
 
-	if Input.is_action_just_pressed("attack") and not is_attacking:
+	if Input.is_action_just_pressed("attack") and attack_enabled and not is_attacking:
 		_attack()
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	_get_input()
 	velocity = input_vector * speed
 	move_and_slide()
@@ -66,6 +76,9 @@ func _update_animation() -> void:
 
 
 func _attack() -> void:
+	if not attack_enabled:
+		return
+
 	is_attacking = true
 	_try_attack_enemies()
 	await get_tree().create_timer(attack_cooldown).timeout
@@ -104,3 +117,53 @@ func _get_facing_vector() -> Vector2:
 			return Vector2.UP
 		_:
 			return Vector2.DOWN
+
+
+func take_damage(amount: int, source_position: Vector2) -> void:
+	var damage: int = maxi(amount - defense, 1)
+	health = maxi(health - damage, 0)
+
+	var dir: Vector2 = (global_position - source_position).normalized()
+	velocity += dir * 120.0
+
+	if health <= 0:
+		die()
+
+
+func add_coin(amount: int) -> void:
+	if amount <= 0:
+		return
+
+	GameState.gold += amount
+
+
+func set_attack_enabled(enabled: bool) -> void:
+	attack_enabled = enabled
+
+
+func is_attack_enabled() -> bool:
+	return attack_enabled
+
+
+func get_current_health() -> int:
+	return health
+
+
+func get_max_health() -> int:
+	return max_health
+
+
+func get_attack_value() -> int:
+	return attack_damage
+
+
+func get_defense_value() -> int:
+	return defense
+
+
+func get_coins() -> int:
+	return int(GameState.gold)
+
+
+func die() -> void:
+	queue_free()

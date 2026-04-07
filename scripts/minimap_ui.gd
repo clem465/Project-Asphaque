@@ -28,6 +28,12 @@ extends CanvasLayer
 @onready var stats_opacity_slider: HSlider = $StatsWindow/TitleBar/Header/OpacitySlider
 @onready var actions_opacity_slider: HSlider = $ActionsWindow/TitleBar/Header/OpacitySlider
 @onready var fog_overlay: TextureRect = $MinimapWindow/MapContainer/FogOverlay
+@onready var inventory_placeholder: Label = $InventoryWindow/Content/InventoryPlaceholder
+@onready var hp_label: Label = $StatsWindow/Content/StatsVBox/HpLabel
+@onready var hp_bar: ProgressBar = $StatsWindow/Content/StatsVBox/HpBar
+@onready var atk_label: Label = $StatsWindow/Content/StatsVBox/AtkLabel
+@onready var def_label: Label = $StatsWindow/Content/StatsVBox/DefLabel
+@onready var attack_toggle_button: Button = $ActionsWindow/Content/ActionsVBox/Action1
 
 var _map_bounds: Rect2 = Rect2()
 var _fog_grid_size: Vector2i = Vector2i.ZERO
@@ -40,8 +46,11 @@ var _last_player_pos: Vector2 = Vector2.ZERO
 var _has_last_player_pos: bool = false
 var _fog_ready: bool = false
 var _fog_enabled_for_scene: bool = true
+var _is_syncing_attack_toggle: bool = false
 
 func _ready() -> void:
+	_disable_button_keyboard_focus(self)
+
 	if toggle_button:
 		toggle_button.pressed.connect(_on_toggle_pressed)
 	if minimap_window:
@@ -87,6 +96,10 @@ func _ready() -> void:
 	if actions_close_button:
 		actions_close_button.pressed.connect(_on_actions_pressed)
 
+	if attack_toggle_button:
+		attack_toggle_button.toggled.connect(_on_attack_toggle_toggled)
+		_update_attack_toggle_text(attack_toggle_button.button_pressed)
+
 	if map_viewport:
 		map_viewport.world_2d = get_viewport().world_2d
 	
@@ -97,8 +110,18 @@ func _ready() -> void:
 	_setup_fog_overlay()
 
 	call_deferred("_center_map")
+	call_deferred("_sync_attack_toggle_from_player")
+
+func _disable_button_keyboard_focus(node: Node) -> void:
+	if node is Button:
+		(node as Button).focus_mode = Control.FOCUS_NONE
+
+	for child in node.get_children():
+		_disable_button_keyboard_focus(child)
 
 func _process(_delta: float) -> void:
+	_update_player_panels()
+
 	if not _fog_enabled_for_scene or not _fog_ready:
 		return
 
@@ -169,6 +192,80 @@ func _on_stats_pressed() -> void:
 func _on_actions_pressed() -> void:
 	if actions_window:
 		actions_window.visible = not actions_window.visible
+
+func _on_attack_toggle_toggled(enabled: bool) -> void:
+	if _is_syncing_attack_toggle:
+		return
+
+	var player: Node2D = _get_player_ref()
+	if player:
+		if player.has_method("set_attack_enabled"):
+			player.set_attack_enabled(enabled)
+		else:
+			player.set("attack_enabled", enabled)
+
+	_update_attack_toggle_text(enabled)
+
+func _update_attack_toggle_text(enabled: bool) -> void:
+	if attack_toggle_button:
+		attack_toggle_button.text = "Attack: ON" if enabled else "Attack: OFF"
+
+func _sync_attack_toggle_from_player() -> void:
+	var player: Node2D = _get_player_ref()
+	if player == null or attack_toggle_button == null:
+		return
+
+	var enabled := true
+	if player.has_method("is_attack_enabled"):
+		enabled = bool(player.is_attack_enabled())
+	else:
+		var raw_value = player.get("attack_enabled")
+		if raw_value is bool:
+			enabled = raw_value
+
+	_is_syncing_attack_toggle = true
+	attack_toggle_button.set_pressed_no_signal(enabled)
+	_is_syncing_attack_toggle = false
+	_update_attack_toggle_text(enabled)
+
+func _update_player_panels() -> void:
+	var player: Node2D = _get_player_ref()
+	if player == null:
+		return
+
+	var current_hp: int = _read_player_int(player, "get_current_health", "health", 0)
+	var max_hp: int = max(1, _read_player_int(player, "get_max_health", "max_health", 1))
+	var atk: int = _read_player_int(player, "get_attack_value", "attack_damage", 0)
+	var defense: int = _read_player_int(player, "get_defense_value", "defense", 0)
+	var coins: int = _read_player_int(player, "get_coins", "coins", 0)
+
+	if hp_label:
+		hp_label.text = "HP: %d / %d" % [current_hp, max_hp]
+
+	if hp_bar:
+		hp_bar.max_value = max_hp
+		hp_bar.value = clamp(current_hp, 0, max_hp)
+
+	if atk_label:
+		atk_label.text = "ATK: %d" % atk
+
+	if def_label:
+		def_label.text = "DEF: %d" % defense
+
+	if inventory_placeholder:
+		inventory_placeholder.text = "Coins: %d" % coins
+
+	_sync_attack_toggle_from_player()
+
+func _read_player_int(player: Node2D, getter_name: String, property_name: String, default_value: int) -> int:
+	if player.has_method(getter_name):
+		return int(player.call(getter_name))
+
+	var raw_value = player.get(property_name)
+	if raw_value is int or raw_value is float:
+		return int(raw_value)
+
+	return default_value
 
 func _center_map() -> void:
 	var main_cam = get_viewport().get_camera_2d()
@@ -282,6 +379,11 @@ func _get_player_ref() -> Node2D:
 
 	var root: Node = get_tree().current_scene
 	if root:
+		var fallback_player: Node = root.find_child("Player", true, false)
+		if fallback_player is Node2D:
+			_player_ref = fallback_player
+			return _player_ref
+
 		var fallback: Node = root.find_child("Player1", true, false)
 		if fallback is Node2D:
 			_player_ref = fallback
