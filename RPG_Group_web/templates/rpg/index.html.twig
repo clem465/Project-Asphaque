@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tower Of Destiny{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<link rel="stylesheet" href="{{ asset('css/rpg.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<div class="rpg-wrapper">
+
+    <!-- 🌐 SÉLECTEUR DE LANGUE + LOGIN — coin haut droit -->
+    <div class="lang-switcher">
+        <div class="lang-dropdown" id="langDropdown">
+
+            <button class="lang-selected" id="langToggle">
+                <span id="selectedFlag">🇫🇷</span>
+                <span id="selectedName">Français</span>
+                <span class="lang-arrow">
+                    <i class="fas fa-chevron-down"></i>
+                </span>
+            </button>
+
+            <ul class="lang-menu">
+                <li class="lang-option" data-lang="fr">🇫🇷 Français</li>
+                <li class="lang-option" data-lang="en">🇬🇧 English</li>
+                <li class="lang-option" data-lang="es">🇪🇸 Español</li>
+                <li class="lang-option" data-lang="ja">🇯🇵 日本語</li>
+            </ul>
+
+        </div>
+
+        <!-- ✅ Bouton login directement sous le dropdown -->
+        <div class="login-button">
+            {% if app.user %}
+                <a href="{{ path('app_logout') }}" class="btn btn-danger" data-i18n="logout">
+                    🚪 Logout
+                </a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="btn btn-primary" data-i18n="login">
+                    ⚔ Login
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <header class="rpg-header">
+        <h1>⚔ TOWER OF DESTINY ⚔</h1>
+        <p class="subtitle" data-i18n="subtitle">Grimpez la tour. Affrontez votre destin.</p>
+    </header>
+
+    <main class="rpg-main">
+        <section class="game-container">
+            <iframe id="game-frame" src="{{ asset('game/index.html') }}" tabindex="0" allow="autoplay; fullscreen *; gamepad *"></iframe>
+        </section>
+    </main>
+
+    <div class="site-content">
+
+        <section class="controls">
+            <h2 data-i18n="controls-title">🎮 Contrôles</h2>
+            <ul>
+                <li><strong data-i18n="ctrl-move-key">ZQSD / Flèches</strong> – <span data-i18n="ctrl-move">Déplacement</span></li>
+                <li><strong data-i18n="ctrl-attack-key">Espace</strong> – <span data-i18n="ctrl-attack">Attaque</span></li>
+                <li><strong>I</strong> – <span data-i18n="ctrl-inventory">Inventaire</span></li>
+                <li><strong>Esc</strong> – <span data-i18n="ctrl-pause">Pause</span></li>
+            </ul>
+        </section>
+
+        <section class="A-propos">
+            <h2 data-i18n="about-title">📖 À propos du jeu</h2>
+            <p data-i18n="about-p1">
+                Plongez dans l'univers de <strong>Tower of Destiny</strong>, un RPG où vous devez gravir
+                une tour remplie de monstres, de pièges et de mystères.
+            </p>
+            <p data-i18n="about-p2">
+                Chaque étage devient plus dangereux. Seuls les héros les plus courageux
+                atteindront le sommet et découvriront la vérité qui s'y cache.
+            </p>
+        </section>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="{{ asset('js/rpg.js') }}"></script>
+{% endblock %}

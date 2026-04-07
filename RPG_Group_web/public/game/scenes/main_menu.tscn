@@ -1,0 +1,122 @@
+[gd_scene format=3 uid="uid://broc7kld6amm7"]
+
+[ext_resource type="Script" uid="uid://b6ydadudd5qcv" path="res://scripts/main_menu.gd" id="1_l6cm7"]
+[ext_resource type="FontFile" uid="uid://bfyj30y5djq5v" path="res://assets/Font/Jersey10-Regular.ttf" id="2_ekxnf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ekxnf"]
+
+[node name="MainMenu" type="Control" unique_id=12469421]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 472.0
+offset_top = 181.0
+offset_right = 472.0
+offset_bottom = 181.0
+script = ExtResource("1_l6cm7")
+
+[node name="Title" type="Label" parent="." unique_id=1406937625]
+layout_mode = 0
+offset_left = -152.0
+offset_top = -133.0
+offset_right = 360.0
+offset_bottom = 29.0
+theme_override_colors/font_color = Color(0.7882353, 0.63529414, 0.18431373, 1)
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 150
+text = "Asphaque"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=604466457]
+layout_mode = 0
+offset_left = -152.0
+offset_top = 11.0
+offset_right = 395.0
+offset_bottom = 403.0
+alignment = 1
+
+[node name="Email" type="Label" parent="VBoxContainer" unique_id=619799504]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7882353, 0.63529414, 0.18431373, 1)
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 29
+text = "Email"
+
+[node name="email_input" type="LineEdit" parent="VBoxContainer" unique_id=1757670416]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 27
+alignment = 1
+
+[node name="Pseudo" type="Label" parent="VBoxContainer" unique_id=630709097]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7882353, 0.63529414, 0.18431373, 1)
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 29
+text = "Pseudo"
+
+[node name="username_input" type="LineEdit" parent="VBoxContainer" unique_id=102373155]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 27
+alignment = 1
+
+[node name="Password" type="Label" parent="VBoxContainer" unique_id=1481157134]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7882353, 0.63529414, 0.18431373, 1)
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 29
+text = "Password"
+
+[node name="password_input" type="LineEdit" parent="VBoxContainer" unique_id=625663247]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 27
+alignment = 1
+secret = true
+
+[node name="error_label" type="Label" parent="VBoxContainer" unique_id=369158248]
+modulate = Color(0.81832296, 0.25643492, 0.025527973, 1)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 27
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1671127545]
+layout_mode = 2
+alignment = 1
+
+[node name="login_button" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1048037538]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 27
+text = "              Login              "
+
+[node name="register_button" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=872019848]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 27
+theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
+text = "           Register            "
+
+[node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=2007644714]
+
+[node name="loader" type="TextureRect" parent="." unique_id=1167940163]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Panel" type="Panel" parent="." unique_id=1574123846]
+z_index = -1
+layout_mode = 0
+offset_left = -472.0
+offset_top = -181.0
+offset_right = 680.0
+offset_bottom = 467.0
+mouse_filter = 2
+
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/login_button" to="." method="_on_login_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/register_button" to="." method="_on_register_pressed"]
+[connection signal="request_completed" from="HTTPRequest" to="." method="_on_request_completed"]

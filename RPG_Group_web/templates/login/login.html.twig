@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tower Of Destiny — Login{% endblock %}
+
+{% block stylesheets %}
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cinzel:wght@400;600;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/login.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<!-- Particules flottantes -->
+<div class="particles" aria-hidden="true">
+    <div class="particle" style="--x:5%;  --dur:8s;  --delay:0s;"></div>
+    <div class="particle" style="--x:12%; --dur:11s; --delay:2s;"></div>
+    <div class="particle" style="--x:20%; --dur:9s;  --delay:4s;"></div>
+    <div class="particle" style="--x:30%; --dur:13s; --delay:1s;"></div>
+    <div class="particle" style="--x:42%; --dur:7s;  --delay:3s;"></div>
+    <div class="particle" style="--x:55%; --dur:10s; --delay:0.5s;"></div>
+    <div class="particle" style="--x:65%; --dur:12s; --delay:5s;"></div>
+    <div class="particle" style="--x:75%; --dur:8s;  --delay:2.5s;"></div>
+    <div class="particle" style="--x:85%; --dur:14s; --delay:1.5s;"></div>
+    <div class="particle" style="--x:93%; --dur:9s;  --delay:4.5s;"></div>
+</div>
+
+<div class="login-card">
+
+    <!-- Logo -->
+    <div class="login-logo">
+        <span class="sword-icon">⚔️</span>
+        <h1>Tower<br>Of Destiny</h1>
+        <p class="tagline">Enter the tower, hero</p>
+    </div>
+
+    <div class="divider"><span>✦</span></div>
+
+    <!-- Erreurs Symfony -->
+    {% if error %}
+        <div class="alert-rpg">⚠ {{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    <!-- Formulaire -->
+    <form method="post" action="{{ path('app_login') }}" novalidate>
+
+        <div class="form-group">
+            <label for="email">📧 Email</label>
+            <div class="input-wrap">
+                <span class="input-icon">✉</span>
+                <input
+                    type="email"
+                    id="email"
+                    name="_username"
+                    value="{{ last_username }}"
+                    placeholder="yourname@gmail.com"
+                    autocomplete="email"
+                    autofocus
+                >
+                <div class="focus-bar"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">🔒 Password</label>
+            <div class="input-wrap">
+                <span class="input-icon">🗝</span>
+                <input
+                    type="password"
+                    id="password"
+                    name="_password"
+                    placeholder="••••••••••"
+                    autocomplete="current-password"
+                >
+                <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password">👁</button>
+                <div class="focus-bar"></div>
+            </div>
+        </div>
+
+        <div class="form-options">
+            <label class="remember-label">
+                <input type="checkbox" name="_remember_me">
+                Remember me
+            </label>
+            <a href="{{ path('app_forgot_password') }}" class="forgot-link">Password forgotten</a>
+        </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <button class="btn-connect" type="submit">⚔ Connect</button>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+        <a href="{{ path('app_register') }}">Create account</a>
+        <span class="footer-sep">✦</span>
+        <a href="{{ path('app_rpg') }}">← Back to tower</a>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.getElementById('togglePw').addEventListener('click', function () {
+        const pw = document.getElementById('password');
+        const isHidden = pw.type === 'password';
+        pw.type = isHidden ? 'text' : 'password';
+        this.textContent = isHidden ? '🙈' : '👁';
+    });
+</script>
+{% endblock %}
