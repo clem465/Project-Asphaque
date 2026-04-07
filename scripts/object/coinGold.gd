@@ -56,14 +56,6 @@ func _collect():
 	if target and target.has_method("add_coin"):
 		target.add_coin(1)
 
-	if collect_sound:
-		collect_sound.pitch_scale = randf_range(0.9, 1.1)
-
-		# 🔥 détacher le son de la pièce
-		collect_sound.reparent(get_tree().current_scene)
-
-		collect_sound.play()
-
 	queue_free()
 
 

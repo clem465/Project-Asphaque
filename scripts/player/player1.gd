@@ -242,6 +242,13 @@ func add_coin(amount: int):
 	GameState.gold += amount
 	print("Coins:", GameState.gold)
 
+	# 🔊 jouer le son ici (dans le player)
+	if coin_sound:
+		coin_sound.pitch_scale = randf_range(0.9, 1.1)
+		coin_sound.play()
+
+	# ✨ texte flottant
+	show_floating_text("+%d 🪙" % amount)
 
 func set_attack_enabled(enabled: bool) -> void:
 	attack_enabled = enabled
