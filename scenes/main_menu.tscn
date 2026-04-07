@@ -115,3 +115,8 @@ offset_left = -472.0
 offset_top = -181.0
 offset_right = 680.0
 offset_bottom = 467.0
+mouse_filter = 2
+
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/login_button" to="." method="_on_login_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/register_button" to="." method="_on_register_pressed"]
+[connection signal="request_completed" from="HTTPRequest" to="." method="_on_request_completed"]

@@ -14,8 +14,8 @@ var is_login = true
 
 
 func _ready():
-	$VBoxContainer/login_button.pressed.connect(_on_login_pressed)
-	$VBoxContainer/register_button.pressed.connect(_on_register_pressed)
+	$VBoxContainer/HBoxContainer/login_button.pressed.connect(_on_login_pressed)
+	$VBoxContainer/HBoxContainer/register_button.pressed.connect(_on_register_pressed)
 	http.request_completed.connect(_on_request_completed)
 
 
@@ -70,7 +70,7 @@ func _on_request_completed(result, response_code, headers, body):
 		return
 
 	if response_code != 200:
-		error_label.text = text
+		error_label.text = "Erreur : " + text
 		return
 
 	var response = JSON.parse_string(text)
@@ -80,6 +80,7 @@ func _on_request_completed(result, response_code, headers, body):
 		return
 
 	if is_login:
+		error_label.text = "Connexion réussie !"
 		var token = response.get("token", "")
 		print("🔐 TOKEN:", token)
 		save_token(token)
