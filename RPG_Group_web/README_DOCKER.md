@@ -3,6 +3,38 @@
 This project can run without using your local PHP runtime for dependencies.
 All PHP extensions and Composer run inside the project Docker image.
 
+## Quick start (current stable flow)
+
+From workspace root (`PROJET FINAL`):
+
+1. Start Symfony + Docker services:
+
+```powershell
+.\run-local.cmd
+```
+
+2. Start the Python auth backend (login/register API):
+
+```powershell
+cd .\Python_log_in\Backend
+"c:/Users/dimit/Desktop/PROJET FINAL/.venv/Scripts/python.exe" -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+3. Export Godot in Web format and publish it into the Symfony iframe slot:
+
+```powershell
+cd .\RPG_Group_web
+.\scripts\publish-godot-web.cmd
+```
+
+4. Open the website (port shown by bootstrap, usually `8000` or `8001`).
+
+If your Godot export was saved to `GODOT/` root instead of `GODOT/build/web`, publish with:
+
+```powershell
+.\scripts\publish-godot-web.cmd "..\GODOT"
+```
+
 ## One command setup
 
 Prerequisite: Docker Desktop must be running.
@@ -111,3 +143,14 @@ Optional custom source folder:
 ```powershell
 .\scripts\publish-godot-web.cmd -SourcePath "C:\path\to\godot-web-build"
 ```
+
+## What is still missing for full plug-and-play
+
+Current status: close to plug-and-play, but not yet true one-command setup.
+
+Missing pieces:
+
+1. Godot Web export is still manual (requires local Godot editor and export action).
+2. Python auth backend is still started separately from `run-local.cmd`.
+3. MySQL credentials are machine-dependent (the backend now has SQLite fallback for local login, but DB provisioning is not fully standardized).
+4. There is not yet a single script that starts Docker + Python API + Godot publish in one fully automated pass.
