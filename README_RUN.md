@@ -2,28 +2,41 @@
 
 ## Quick start
 
-1. Export Godot to Web output folder:
-   - Source project: `GODOT/`
-   - Export destination: `GODOT/build/web/`
+1. Start Symfony + Docker services from workspace root:
 
-2. Publish exported files into Symfony public slot:
+```powershell
+.\run-local.cmd
+```
+
+2. Start the Python auth backend in a second terminal:
+
+```powershell
+cd .\Python_log_in\Backend
+..\..\.venv\Scripts\python.exe -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+3. Export Godot to Web output folder:
+   - Source project: `GODOT/`
+   - Preferred export destination: `GODOT/build/web/`
+
+4. Publish exported files into Symfony public slot:
 
 ```powershell
 cd .\RPG_Group_web
 .\scripts\publish-godot-web.cmd
 ```
 
-3. Start everything from workspace root:
+If your export was generated in `GODOT/` root instead of `GODOT/build/web/`:
 
 ```powershell
-cd ..
-.\run-local.cmd
+cd .\RPG_Group_web
+.\scripts\publish-godot-web.cmd "..\GODOT"
 ```
 
 This will:
-- bootstrap Docker services for Symfony
+- run Docker services for Symfony
 - auto-resolve host port conflicts
-- open the website in your browser
+- expose the game page in your browser (usually port `8000` or `8001`)
 
 ## What page loads the game?
 

@@ -17,7 +17,14 @@ From workspace root (`PROJET FINAL`):
 
 ```powershell
 cd .\Python_log_in\Backend
-"c:/Users/dimit/Desktop/PROJET FINAL/.venv/Scripts/python.exe" -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+..\..\.venv\Scripts\python.exe -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+If this is the first run and Python modules are missing:
+
+```powershell
+cd .\Python_log_in\Backend
+..\..\.venv\Scripts\python.exe -m pip install fastapi uvicorn mysql-connector-python "python-jose[cryptography]"
 ```
 
 3. Export Godot in Web format and publish it into the Symfony iframe slot:
@@ -25,6 +32,13 @@ cd .\Python_log_in\Backend
 ```powershell
 cd .\RPG_Group_web
 .\scripts\publish-godot-web.cmd
+```
+
+If the command above fails with `GODOT\build\web` not found, publish from `GODOT` root:
+
+```powershell
+cd .\RPG_Group_web
+.\scripts\publish-godot-web.cmd "..\GODOT"
 ```
 
 4. Open the website (port shown by bootstrap, usually `8000` or `8001`).
