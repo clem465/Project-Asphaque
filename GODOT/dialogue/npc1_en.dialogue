@@ -1,0 +1,15 @@
+~ start
+Theo: Salam roya!
+Theo: Do you want to enter the dungeon?
+
+- Yes => go_dungeon
+- No => stay
+
+~ go_dungeon
+do GameState.choice = "yes"
+Theo: Good luck!
+=> END
+
+~ stay
+do GameState.choice = "no"
+=> END

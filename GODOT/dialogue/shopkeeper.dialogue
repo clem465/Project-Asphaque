@@ -1,0 +1,19 @@
+~ start
+Marchand: Bienvenue aventurier !
+Marchand: J’ai de quoi t’équiper si tu as assez d’or.
+Marchand: Tu veux voir mes marchandises ?
+
+- Oui => open_shop
+- Non => leave
+
+
+~ open_shop
+do GameState.choice = "yes"
+Marchand: Très bien, regarde ce que j’ai à vendre !
+=> END
+
+
+~ leave
+do GameState.choice = "no"
+Marchand: Dommage… reviens quand tu seras prêt.
+=> END

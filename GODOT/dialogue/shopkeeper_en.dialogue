@@ -1,0 +1,19 @@
+~ start
+Shopkeeper: Welcome, adventurer!
+Shopkeeper: I have gear if you have enough gold.
+Shopkeeper: Do you want to see my goods?
+
+- Yes => open_shop
+- No => leave
+
+
+~ open_shop
+do GameState.choice = "yes"
+Shopkeeper: Very well, take a look at what I sell!
+=> END
+
+
+~ leave
+do GameState.choice = "no"
+Shopkeeper: Too bad... come back when you are ready.
+=> END

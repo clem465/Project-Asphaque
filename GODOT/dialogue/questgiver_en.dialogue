@@ -1,0 +1,46 @@
+~ start
+Lina: Hello adventurer.
+Lina: Slimes are coming out of the dungeon and threatening the village.
+Lina: Can you eliminate 5 of them?
+
+- Yes, I will do it => accept
+- Not now => refuse
+
+
+~ accept
+do GameState.choice = "accept_quest"
+Lina: Thank you! Come back after 5 slimes are defeated.
+=> END
+
+
+~ refuse
+Lina: All right. Come back when you are ready.
+=> END
+
+
+~ in_progress
+Lina: The quest is in progress.
+Lina: Defeat more slimes and come back.
+=> END
+
+
+~ ready_to_turn_in
+Lina: Have you finished cleaning the dungeon?
+- Yes, mission complete => turn_in
+- Not yet => not_yet
+
+
+~ turn_in
+do GameState.choice = "turn_in_quest"
+Lina: Excellent work! Here is your reward.
+=> END
+
+
+~ not_yet
+Lina: No problem, finish the mission and come back.
+=> END
+
+
+~ completed
+Lina: Thanks again for your help, the village is safer now.
+=> END

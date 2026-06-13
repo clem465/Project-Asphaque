@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://chsi482ynffuu"]
+
+[ext_resource type="Texture2D" uid="uid://by76coc8sptpo" path="res://assets/object/pngtree-old-wooden-door-of-castle-png-image_12516559.png" id="1_1wcim"]
+[ext_resource type="Script" uid="uid://bkda2qkr0yjcm" path="res://scripts/object/door.gd" id="1_4v2mi"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4v2mi"]
+atlas = ExtResource("1_1wcim")
+region = Rect2(0, 0, 360, 360)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_xpe8u"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4v2mi")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_doydo"]
+size = Vector2(265, 340.00003)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xpe8u"]
+radius = 208.29066
+
+[node name="Door" type="Area2D" unique_id=1867020924]
+scale = Vector2(0.1, 0.1)
+collision_layer = 16
+collision_mask = 2
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2025883653]
+position = Vector2(180, 180)
+sprite_frames = SubResource("SpriteFrames_xpe8u")
+
+[node name="CollisionBody" type="StaticBody2D" parent="." unique_id=55936317]
+scale = Vector2(0.99999994, 0.99999994)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionBody" unique_id=1344070321]
+position = Vector2(179.49998, 180.00002)
+scale = Vector2(0.99999994, 0.99999994)
+shape = SubResource("RectangleShape2D_doydo")
+
+[node name="InteractionArea" type="Area2D" parent="." unique_id=782462231]
+position = Vector2(180, 300)
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("1_4v2mi")
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=1022748798]
+shape = SubResource("CircleShape2D_xpe8u")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="body_exited" from="." to="." method="_on_body_exited"]
+[connection signal="body_entered" from="InteractionArea" to="InteractionArea" method="_on_body_entered"]
+[connection signal="body_exited" from="InteractionArea" to="InteractionArea" method="_on_body_exited"]

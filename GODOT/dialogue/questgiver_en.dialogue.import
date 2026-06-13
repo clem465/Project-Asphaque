@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://dnsvh3xqwv0lu"
+path="res://.godot/imported/questgiver_en.dialogue-0d996130593cfc15fa2f220f3d6e3fee.tres"
+
+[deps]
+
+source_file="res://dialogue/questgiver_en.dialogue"
+dest_files=["res://.godot/imported/questgiver_en.dialogue-0d996130593cfc15fa2f220f3d6e3fee.tres"]
+
+[params]
+
+defaults=true

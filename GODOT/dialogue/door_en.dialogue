@@ -1,0 +1,14 @@
+~ start
+Door: Salam roya!
+Door: Do you want to leave the dungeon?
+
+- Yes => go_dungeon
+- No => stay
+
+~ go_dungeon
+do GameState.choice = "yes"
+=> END
+
+~ stay
+do GameState.choice = "no"
+=> END

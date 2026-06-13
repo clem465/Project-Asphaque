@@ -1,0 +1,14 @@
+~ start
+Porte: Salam roya !
+Porte: Tu veux sortir du donjon ?
+
+- Oui => go_dungeon
+- Non => stay
+
+~ go_dungeon
+do GameState.choice = "yes"
+=> END
+
+~ stay
+do GameState.choice = "no"
+=> END

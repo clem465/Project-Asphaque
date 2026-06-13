@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://wi8kq04pwaem"]
+
+[ext_resource type="Script" uid="uid://dur00niw8v4mv" path="res://scripts/npc/UI/Shop.gd" id="1_cs7jk"]
+
+[node name="CanvasLayer" type="CanvasLayer" unique_id=312043361]
+layer = 0
+script = ExtResource("1_cs7jk")
+
+[node name="Panel" type="Panel" parent="." unique_id=2096721927]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -170.0
+offset_right = 220.0
+offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel" unique_id=1116397465]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+theme_override_constants/separation = 10
+
+[node name="Marchand" type="Label" parent="Panel/VBoxContainer" unique_id=323686956]
+layout_mode = 2
+text = "Shop"
+horizontal_alignment = 1
+
+[node name="ItemList" type="ItemList" parent="Panel/VBoxContainer" unique_id=243773774]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Fermer" type="Button" parent="Panel/VBoxContainer" unique_id=683822488]
+layout_mode = 2
+text = "Close Shop"
+
+[connection signal="item_selected" from="Panel/VBoxContainer/ItemList" to="." method="_on_item_list_item_activated"]
