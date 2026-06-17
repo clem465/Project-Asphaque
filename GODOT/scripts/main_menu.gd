@@ -9,10 +9,13 @@ extends Control
 @onready var email_label: Label = $VBoxContainer/Email
 @onready var pseudo_label: Label = $VBoxContainer/Pseudo
 @onready var password_label: Label = $VBoxContainer/Password
-@onready var login_button: Button = $VBoxContainer/HBoxContainer/login_button
-@onready var register_button: Button = $VBoxContainer/HBoxContainer/register_button
+@onready var login_button: Button = $VBoxContainer/TopCenter/HBoxContainer/login_button
+@onready var register_button: Button = $VBoxContainer/TopCenter/HBoxContainer/register_button
+@onready var submit_button: Button = $VBoxContainer/SubmitCenter/submit_button
 
 const DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
+const ACTIVE_BUTTON_COLOR: Color = Color(0.4, 0.7, 0.95, 1)
+const INACTIVE_BUTTON_COLOR: Color = Color(0.85, 0.85, 0.85, 1)
 
 var api_base_url = DEFAULT_API_BASE_URL
 var api_login = ""
@@ -35,12 +38,21 @@ func _ready():
 		if not _locale_manager.locale_changed.is_connected(_on_locale_changed):
 			_locale_manager.locale_changed.connect(_on_locale_changed)
 
-	if not $VBoxContainer/HBoxContainer/login_button.pressed.is_connected(_on_login_pressed):
-		$VBoxContainer/HBoxContainer/login_button.pressed.connect(_on_login_pressed)
-	if not $VBoxContainer/HBoxContainer/register_button.pressed.is_connected(_on_register_pressed):
-		$VBoxContainer/HBoxContainer/register_button.pressed.connect(_on_register_pressed)
+	if not $VBoxContainer/TopCenter/HBoxContainer/login_button.pressed.is_connected(_on_login_pressed):
+		$VBoxContainer/TopCenter/HBoxContainer/login_button.pressed.connect(_on_login_pressed)
+	if not $VBoxContainer/TopCenter/HBoxContainer/register_button.pressed.is_connected(_on_register_pressed):
+		$VBoxContainer/TopCenter/HBoxContainer/register_button.pressed.connect(_on_register_pressed)
+	if not $VBoxContainer/SubmitCenter/submit_button.pressed.is_connected(_on_submit_pressed):
+		$VBoxContainer/SubmitCenter/submit_button.pressed.connect(_on_submit_pressed)
 	if not http.request_completed.is_connected(_on_request_completed):
 		http.request_completed.connect(_on_request_completed)
+
+	if login_button:
+		login_button.toggle_mode = true
+	if register_button:
+		register_button.toggle_mode = true
+
+	_update_form_ui()
 
 func _on_locale_changed(_locale: String) -> void:
 	_apply_locale()
@@ -63,6 +75,19 @@ func _apply_locale() -> void:
 	if register_button:
 		register_button.text = _locale_manager.tr_key("ui.register")
 
+func _update_form_ui() -> void:
+	if pseudo_label:
+		pseudo_label.visible = not is_login
+	if username_input:
+		username_input.visible = not is_login
+	if login_button:
+		login_button.modulate = ACTIVE_BUTTON_COLOR if is_login else INACTIVE_BUTTON_COLOR
+	if register_button:
+		register_button.modulate = INACTIVE_BUTTON_COLOR if is_login else ACTIVE_BUTTON_COLOR
+	if submit_button:
+		submit_button.text = login_button.text if is_login else register_button.text
+	if error_label:
+		error_label.text = ""
 
 func _resolve_api_base_url() -> String:
 	if OS.has_feature("web") and Engine.has_singleton("JavaScriptBridge"):
@@ -77,41 +102,39 @@ func _resolve_api_base_url() -> String:
 	return DEFAULT_API_BASE_URL
 
 
-# 🔐 LOGIN
+# 🔐 MODE SWITCH
 func _on_login_pressed():
+	is_login = true
+	_update_form_ui()
+
+
+# 📝 MODE SWITCH
+func _on_register_pressed():
+	is_login = false
+	_update_form_ui()
+
+
+# ▶️ SUBMIT
+func _on_submit_pressed():
 	if is_requesting:
 		return
-	
-	is_requesting = true
-	is_login = true
 
-	var body = JSON.stringify({
+	is_requesting = true
+
+	var body = {
 		"email": email_input.text,
 		"password": password_input.text
-	})
+	}
+	var endpoint = api_login
 
-	print("➡️ LOGIN:", body)
+	if is_login:
+		print("➡️ LOGIN:", JSON.stringify(body))
+	else:
+		body["username"] = username_input.text
+		endpoint = api_register
+		print("➡️ REGISTER:", JSON.stringify(body))
 
-	http.request(api_login, ["Content-Type: application/json"], HTTPClient.METHOD_POST, body)
-
-
-# 📝 REGISTER
-func _on_register_pressed():
-	if is_requesting:
-		return
-	
-	is_requesting = true
-	is_login = false
-
-	var body = JSON.stringify({
-		"email": email_input.text,
-		"password": password_input.text,
-		"username": username_input.text
-	})
-
-	print("➡️ REGISTER:", body)
-
-	http.request(api_register, ["Content-Type: application/json"], HTTPClient.METHOD_POST, body)
+	http.request(endpoint, ["Content-Type: application/json"], HTTPClient.METHOD_POST, JSON.stringify(body))
 
 
 # 🌐 RÉPONSE

@@ -35,6 +35,30 @@ offset_right = 395.0
 offset_bottom = 403.0
 alignment = 1
 
+[node name="TopCenter" type="CenterContainer" parent="VBoxContainer" unique_id=1837264510]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/TopCenter" unique_id=1671127545]
+layout_mode = 2
+alignment = 1
+
+[node name="login_button" type="Button" parent="VBoxContainer/TopCenter/HBoxContainer" unique_id=1048037538]
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 27
+rect_min_size = Vector2(180, 0)
+text = "Login"
+
+[node name="register_button" type="Button" parent="VBoxContainer/TopCenter/HBoxContainer" unique_id=872019848]
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 27
+theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
+rect_min_size = Vector2(180, 0)
+text = "Register"
+
 [node name="Email" type="Label" parent="VBoxContainer" unique_id=619799504]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7882353, 0.63529414, 0.18431373, 1)
@@ -75,6 +99,21 @@ theme_override_font_sizes/font_size = 27
 alignment = 1
 secret = true
 
+[node name="Spacer" type="Control" parent="VBoxContainer" unique_id=1827364510]
+layout_mode = 2
+rect_min_size = Vector2(0, 18)
+
+[node name="SubmitCenter" type="CenterContainer" parent="VBoxContainer" unique_id=920374651]
+layout_mode = 2
+
+[node name="submit_button" type="Button" parent="VBoxContainer/SubmitCenter" unique_id=2023456789]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 27
+rect_min_size = Vector2(220, 0)
+text = "Submit"
+
 [node name="error_label" type="Label" parent="VBoxContainer" unique_id=369158248]
 modulate = Color(0.81832296, 0.25643492, 0.025527973, 1)
 layout_mode = 2
@@ -82,23 +121,6 @@ theme_override_fonts/font = ExtResource("2_ekxnf")
 theme_override_font_sizes/font_size = 27
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1671127545]
-layout_mode = 2
-alignment = 1
-
-[node name="login_button" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1048037538]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_ekxnf")
-theme_override_font_sizes/font_size = 27
-text = "              Login              "
-
-[node name="register_button" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=872019848]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_ekxnf")
-theme_override_font_sizes/font_size = 27
-theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
-text = "           Register            "
 
 [node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=2007644714]
 
@@ -111,12 +133,13 @@ offset_bottom = 40.0
 [node name="Panel" type="Panel" parent="." unique_id=1574123846]
 z_index = -1
 layout_mode = 0
-offset_left = -472.0
-offset_top = -181.0
-offset_right = 680.0
-offset_bottom = 467.0
+offset_left = -473.0
+offset_top = -180.0
+offset_right = 679.0
+offset_bottom = 468.0
 mouse_filter = 2
 
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/login_button" to="." method="_on_login_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/register_button" to="." method="_on_register_pressed"]
+[connection signal="pressed" from="VBoxContainer/TopCenter/HBoxContainer/login_button" to="." method="_on_login_pressed"]
+[connection signal="pressed" from="VBoxContainer/TopCenter/HBoxContainer/register_button" to="." method="_on_register_pressed"]
+[connection signal="pressed" from="VBoxContainer/SubmitCenter/submit_button" to="." method="_on_submit_pressed"]
 [connection signal="request_completed" from="HTTPRequest" to="." method="_on_request_completed"]
