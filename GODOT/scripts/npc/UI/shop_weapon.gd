@@ -24,6 +24,8 @@ func _ready() -> void:
 
 	close_button.pressed.connect(_on_close_pressed)
 	close_button.text = "Close Shop"
+	
+	item_list.item_activated.connect(_on_item_list_item_activated)
 
 
 func _ensure_default_items() -> void:
@@ -31,7 +33,7 @@ func _ensure_default_items() -> void:
 		{"id": "iron_sword", "name": "Iron Sword", "price": 100, "attack": 10},
 		{"id": "steel_sword", "name": "Steel Sword", "price": 250, "attack": 25},
 		{"id": "iron_axe", "name": "Iron Axe", "price": 150, "attack": 15},
-		{"id": "knight_shield", "name": "Knight Shield", "price": 200, "attack": 10, "defense": 10}
+		{"id": "knight_shield", "name": "Knight Shield", "price": 200, "defense": 20}
 	]
 
 	for default_item in default_items:
@@ -68,6 +70,7 @@ func _refresh_title() -> void:
 
 
 func _on_item_list_item_activated(index: int) -> void:
+	print("CLICK ITEM", index)
 	if index < 0 or index >= shop_items.size():
 		return
 

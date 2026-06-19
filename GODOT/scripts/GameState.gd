@@ -25,6 +25,7 @@ var inventory: Array = []
 var inventory_counts: Dictionary = {}
 var assigned_action_item: String = ""
 var _locale_manager: Node = null
+var equipped_weapon: String = ""
 
 # -------------------------
 # SPAWN PONCTUEL (téléportations génériques hors donjon)
@@ -66,6 +67,33 @@ var item_definitions := {
 	"speed_potion": {
 		"display_name": "Speed Boost Potion",
 		"speed_multiplier": 1.6,
+	},
+	"iron_sword": {
+	"display_name": "Iron Sword",
+	"category": "weapon",
+	"attack": 10,
+	"defense": 0
+	},
+
+	"steel_sword": {
+		"display_name": "Steel Sword",
+		"category": "weapon",
+		"attack": 25,
+		"defense": 0
+	},
+
+	"iron_axe": {
+		"display_name": "Iron Axe",
+		"category": "weapon",
+		"attack": 15,
+		"defense": 0
+	},
+
+	"knight_shield": {
+		"display_name": "Knight Shield",
+		"category": "weapon",
+		"attack": 0,
+		"defense": 10
 	}
 }
 
@@ -159,6 +187,7 @@ func _build_state_payload() -> Dictionary:
 	var payload := {
 		"gold": gold,
 		"inventory_counts": inventory_counts.duplicate(true),
+		"equipped_weapon": equipped_weapon,
 		"assigned_action_item": assigned_action_item,
 		"quests": quests.duplicate(true),
 		"choice": choice,
@@ -183,6 +212,7 @@ func _apply_state_payload(state: Dictionary) -> void:
 	gold = int(state.get("gold", gold))
 	inventory_counts = _normalize_dict(state.get("inventory_counts", {}))
 	assigned_action_item = String(state.get("assigned_action_item", ""))
+	equipped_weapon = String(state.get("equipped_weapon", ""))
 	quests = _normalize_dict(state.get("quests", quests))
 	choice = String(state.get("choice", choice))
 
@@ -505,3 +535,46 @@ func save_gold():
 func restore_gold():
 	gold = saved_gold
 	print("Gold restored:", gold)
+
+func equip_weapon(item_id: String) -> bool:
+
+	if get_item_count(item_id) <= 0:
+		return false
+
+	if not item_definitions.has(item_id):
+		return false
+
+	if item_definitions[item_id].get("category", "") != "weapon":
+		return false
+
+	equipped_weapon = item_id
+	_queue_save_if_ready()
+
+	return true
+
+
+func unequip_weapon() -> void:
+	equipped_weapon = ""
+	_queue_save_if_ready()
+
+
+func get_weapon_attack() -> int:
+
+	if equipped_weapon == "":
+		return 0
+
+	if not item_definitions.has(equipped_weapon):
+		return 0
+
+	return int(item_definitions[equipped_weapon].get("attack", 0))
+
+
+func get_weapon_defense() -> int:
+
+	if equipped_weapon == "":
+		return 0
+
+	if not item_definitions.has(equipped_weapon):
+		return 0
+
+	return int(item_definitions[equipped_weapon].get("defense", 0))
