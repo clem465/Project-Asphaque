@@ -39,15 +39,15 @@ const MIN_DISTANCE_BETWEEN_STAIRS := 18
 # -------------------------
 const FLOOR := Vector2i(3, 3)
 
-const WALL_TOP := Vector2i(2, 2)
-const WALL_BOTTOM := Vector2i(3, 6)
-const WALL_LEFT := Vector2i(2, 3)
-const WALL_RIGHT := Vector2i(6, 3)
+const WALL_TOP := Vector2i(2, 18)
+const WALL_BOTTOM := Vector2i(6, 19)
+const WALL_LEFT := Vector2i(2, 21)
+const WALL_RIGHT := Vector2i(6, 19)
 
-const CORNER_TL := Vector2i(2, 2)
-const CORNER_TR := Vector2i(6, 2)
-const CORNER_BL := Vector2i(2, 6)
-const CORNER_BR := Vector2i(6, 6)
+const CORNER_TL := Vector2i(6, 11)
+const CORNER_TR := Vector2i(7, 11)
+const CORNER_BL := Vector2i(6,11)
+const CORNER_BR := Vector2i(7, 11)
 
 # -------------------------
 # SPAWN JOUEUR
