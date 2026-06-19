@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://ettsa780pu7o"]
+
+[ext_resource type="Texture2D" uid="uid://bx2l7bx575cpn" path="res://assets/npc/NPC_Characters_v1.0/Male3.png" id="1_legcr"]
+[ext_resource type="PackedScene" uid="uid://bhho1kj35s4cp" path="res://helpers/actionable.tscn" id="2_5v1qa"]
+[ext_resource type="Script" uid="uid://cvfpppb6lgjvh" path="res://scripts/npc/npc_3.gd" id="3_fq7w3"]
+[ext_resource type="Resource" uid="uid://bsrjuo7o1jyxt" path="res://dialogue/questgiver.dialogue" id="4_rhtun"]
+[ext_resource type="Resource" uid="uid://dnsvh3xqwv0lu" path="res://dialogue/questgiver_en.dialogue" id="5_w7vfe"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hjsua"]
+atlas = ExtResource("1_legcr")
+region = Rect2(0, 336, 32, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_thue5"]
+atlas = ExtResource("1_legcr")
+region = Rect2(32, 336, 32, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8wyxg"]
+atlas = ExtResource("1_legcr")
+region = Rect2(64, 336, 32, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u1hw5"]
+atlas = ExtResource("1_legcr")
+region = Rect2(96, 336, 32, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_1qn6g"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hjsua")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_thue5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8wyxg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u1hw5")
+}],
+"loop": true,
+"name": &"default",
+"speed": 2.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wkgsq"]
+size = Vector2(9, 16)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_nb6j1"]
+radius = 44.04543
+
+[node name="npc4" type="CharacterBody2D" unique_id=95341914]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=309132502]
+position = Vector2(0, 1)
+scale = Vector2(0.57812494, 0.48437485)
+sprite_frames = SubResource("SpriteFrames_1qn6g")
+autoplay = "default"
+frame_progress = 0.06959828
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1070307999]
+shape = SubResource("RectangleShape2D_wkgsq")
+
+[node name="Actionable" parent="." unique_id=130623042 instance=ExtResource("2_5v1qa")]
+script = ExtResource("3_fq7w3")
+dialogue_resource = ExtResource("4_rhtun")
+dialogue_resource_en = ExtResource("5_w7vfe")
+quest_id = "slime_cleanup"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Actionable" unique_id=838763148]
+position = Vector2(1, 0)
+shape = SubResource("CircleShape2D_nb6j1")

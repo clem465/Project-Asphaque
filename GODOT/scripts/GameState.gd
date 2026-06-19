@@ -39,6 +39,12 @@ var item_definitions := {
 
 var choice := ""
 
+# position temporaire pour le prochain spawn (appliquée une fois)
+var next_spawn_position: Vector2 = Vector2.ZERO
+var next_spawn_once: bool = false
+var house_return_spawn_position: Vector2 = Vector2.ZERO
+var house_return_spawn_once: bool = false
+
 const QUEST_STATUS_NOT_STARTED := "not_started"
 const QUEST_STATUS_IN_PROGRESS := "in_progress"
 const QUEST_STATUS_COMPLETED := "completed"

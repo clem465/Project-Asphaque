@@ -24,6 +24,17 @@ func _ready() -> void:
 	health = max_health
 	_base_speed = speed
 
+	# appliquer une position de spawn une seule fois si demandée par GameState
+	if GameState.next_spawn_once:
+		global_position = GameState.next_spawn_position
+		GameState.next_spawn_once = false
+		GameState.next_spawn_position = Vector2.ZERO
+
+	var camera := get_node_or_null("Camera2D") as Camera2D
+	if camera:
+		camera.make_current()
+		camera.reset_smoothing()
+
 
 func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("interact"):

@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://4xiweimjtwf"]
+
+[ext_resource type="Script" uid="uid://c3iqgkwvv83j4" path="res://scripts/object/enter_house.gd" id="1_enter_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_enter"]
+size = Vector2(18, 16)
+
+[node name="EnterHouse" type="Area2D" unique_id=286432684]
+collision_layer = 16
+collision_mask = 1
+script = ExtResource("1_enter_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=644499626]
+position = Vector2(9, 12)
+shape = SubResource("RectangleShape2D_enter")

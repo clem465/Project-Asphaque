@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://c4jpgv4k5cpig"]
+
+[ext_resource type="Script" uid="uid://bpase0oi76hl8" path="res://scripts/object/exit_house.gd" id="1_exit_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
+size = Vector2(32.5, 16)
+
+[node name="ExitHouse" type="Area2D" unique_id=1624126511]
+collision_layer = 16
+collision_mask = 1
+script = ExtResource("1_exit_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1850380845]
+position = Vector2(16.75, 8)
+shape = SubResource("RectangleShape2D_exit")

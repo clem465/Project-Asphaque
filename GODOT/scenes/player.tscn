@@ -507,7 +507,7 @@ size = Vector2(15.841584, 15.841586)
 [sub_resource type="CircleShape2D" id="CircleShape2D_ur7pv"]
 radius = 23.762377
 
-[node name="Player" type="CharacterBody2D" unique_id=899918847]
+[node name="Player" type="CharacterBody2D" unique_id=899918847 groups=["player"]]
 scale = Vector2(0.505, 0.505)
 script = ExtResource("1_g2els")
 

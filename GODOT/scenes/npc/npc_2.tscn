@@ -52,7 +52,6 @@ radius = 44.04543
 collision_mask = 2
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1677987511]
-z_index = 3
 position = Vector2(0, 1)
 scale = Vector2(0.57812494, 0.48437485)
 sprite_frames = SubResource("SpriteFrames_025l1")
