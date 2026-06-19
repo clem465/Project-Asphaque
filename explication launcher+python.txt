@@ -1,0 +1,125 @@
+COMMENT MARCHE LE LAUNCHER !!!
+
+Run-all lance une api python backend/main.py un backend fastapi sur 127.0.0.1
+Lance en paralelle Lance run-local
+
+
+Run-local lance le symphony (RPG_Groupe_web) via bootstrap.cmd, ce dernier pilote docker compose qui ouvre un container app avec l'app symphonie sur port 8080 et un postgres pour la db.
+
+puis, vérification que tout est près avant de lancer la page web.
+
+┌─────────────────────────────────────────────────────┐
+│                   Ta machine Windows              				      │
+│                                                     					  │
+│  ┌─────────────────────┐                          			  │
+│  │  API Python (FastAPI)		  │  ← port 8000 (hôte direct)			  │
+│  │  Python_log_in\      		  │    JWT + MySQL connector   			  │
+│  │  Backend\main.py     		  │                            			  │
+│  └──────────┬──────────┘                           			  │
+│            	   │ HTTP                                  				  │
+│  ┌──────────▼───────────────────────────────────┐     │
+│  │            Docker Compose                  				    │     │
+│  │                                              					│     │
+│  │  ┌─────────────┐      ┌──────────────────┐  		│     │
+│  │  │  app             │      │   db             		│  		│     │
+│  │  │  (Symfony)       │  ◄────►│(MySQL/MariaDB)		│  		│     │
+│  │  │  port ?:8000     │	      │   port 3306      		│  		│     │
+│  │  └─────────────┘      └──────────────────┘  		│     │
+│  │                                              					│     │
+│  │  ┌─────────────────────────────────────┐        │     │
+│  │  │  (éventuellement: conteneur assets, 			   │        │     │
+│  │  │   nginx, redis, etc.)               			   │        │     │
+│  │  └─────────────────────────────────────┘        │     │
+│  └──────────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────┘
+
+
+COMMENT MARCHE L'API PYTHON !!!
+Etape 1 : connection a la db dans le docker. si ça connecte pas il passe a une db locale.
+(et un compte admin crée automatiquement. pas tres safe mais c'est pour le testing, backdoor perso)
+
+Etape 2 : quand qq se co, ça crée un token "JWT" (JSON WEB TOKEN) qui seras enregistré dans secret key. cette key seras demandé pour chaque requete. (pour le moment elle est hard codé, pas idéale)
+
+login et register sont publiques, get et postes sont privé par une demande token.
+
+
+une fois identifié, l'utilisateur est représenté comme tel dans la bdd:
+
+users
+├── id          (clé primaire)
+├── email       (unique)
+├── username
+└── password    (SHA-256, pas stocké en clair)
+
+user_state
+├── user_id     (clé primaire = lien vers users.id)
+└── state_json  (la progression du jeu, stockée en JSON)
+
+Comment ça se goupille.
+Au lancement, GODOT fait une demande post avec une interface qui en arrière plan utilise l'outil python pour faire la liaison des requètes en bdd. chaque action sur l'interface godot fait une requete qui est envoyé dans la bdd dispo via le python. Ce apres quoi il renvoie un token, godot récupère le token et le stock. Traite le GET ou POST et agis en conséquence.
+
+
+
+
+POUR RESUMER :
+
+bootstrap.ps1
+  │
+  ├── 1. Vérifie que Docker est installé et le daemon actif
+  │         Si Docker Desktop est éteint → le lance automatiquement
+  │         Si toujours pas prêt → throw (arrêt du script)
+  │
+  ├── 2. Résout le port disponible
+  │         Essaie 8080 → occupé ? → essaie 8081 → 8082... jusqu'à 8130
+  │         Stocke le résultat dans $env:APP_PORT
+  │
+  ├── 3. Lance UNIQUEMENT le conteneur "database"
+  │         docker compose up -d --build database
+  │
+  ├── 4. Lance composer install DANS le conteneur "app"
+  │         (conteneur temporaire --rm, les dépendances PHP s'installent)
+  │
+  ├── 5. (Optionnel) Migrations Doctrine si -WithMigrations
+  │         php bin/console doctrine:migrations:migrate
+  │
+  ├── 6. Lance le conteneur "app" (Symfony)
+  │         docker compose up -d app
+  │
+  └── 7. Vérifie les routes API
+            php bin/console debug:router | grep api_v1
+
+
+Ta machine Windows
+│
+├── Port 8000 ──► API Python FastAPI (fenêtre PowerShell séparée)
+│                  └── SQLite (fichier local, fallback MySQL)
+│
+└── Port 8080* ──► Docker
+                    ├── conteneur "app"     (Symfony / PHP)
+                    │     └── composer install au démarrage
+                    └── conteneur "database" (MySQL/MariaDB)
+                          └── utilisé par Symfony ET potentiellement par l'API Python
+
+LE JEU!!!!
+
+dans SCRIPTES donc tout ce qui va etre entré dans donjon, connection bdd, définition des entité de jeu(items, ect), langues et changements de langues, 
+
+actionable_teleport pour entrer dans le donjon en récupérant les dialogues du pnj 1 et en check les states de dialogue
+
+fog_of_war qui est un jeu de vecteur sur une vue minuature de l'écrant du joueur, avec un jeu de z axis pour cacher des éléments. 
+map_pan_zoom qui modifie les vecteurs et scaleurs de taille.
+minimap_ui qui sert a manage la fenetre flottante de la minimap et que possède ses propres vecteurs de tailles je crois.
+
+
+GAMESTATE reprend toutes les entitées à état du jeu restante et gère leur structure et algo d'état. Que ça soit requetes post get ou les items, leur quantité et effet, ect. Le refill de l'inventaire et les confirmations d'états, et les items en hot key.
+
+Localmanager qui gère les langues 
+
+
+MAIN_MENUE qui gère la connection a la bdd via le python et l'interface. vérification token et téléportation au village du départ.
+
+
+
+PLAYER qui crée l'objet joueur avec ses données, et les fonctions de déplacement et actions qui le constitue.
+
+le dossier SCENE contient les maps1

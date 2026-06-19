@@ -26,6 +26,38 @@ var inventory_counts: Dictionary = {}
 var assigned_action_item: String = ""
 var _locale_manager: Node = null
 
+# -------------------------
+# SPAWN PONCTUEL (téléportations génériques hors donjon)
+# -------------------------
+## Si true, le joueur appliquera next_spawn_position une seule fois dans son
+## _ready(), puis remettra ce flag à false. Utilisé par des portes/téléporteurs
+## qui veulent placer le joueur à un endroit précis au chargement d'une scène.
+var next_spawn_once: bool = false
+## Position cible à appliquer une seule fois (voir next_spawn_once).
+var next_spawn_position: Vector2 = Vector2.ZERO
+
+## Même mécanisme, dédié au retour depuis une maison : où replacer le joueur
+## dans la scène extérieure (devant la porte) quand il ressort.
+var house_return_spawn_once: bool = false
+var house_return_spawn_position: Vector2 = Vector2.ZERO
+
+# -------------------------
+# SYSTÈME D'ÉTAGES
+# -------------------------
+## Étage actuel dans le donjon (1 = premier sous-sol, 2 = deuxième, etc.)
+var current_floor: int = 1
+## Seed maîtresse du run en cours. Combinée au numéro d'étage pour générer
+## une seed unique et reproductible par étage.
+var dungeon_master_seed: int = 0
+## D'où vient le joueur lors de la dernière transition d'étage.
+## Utilisé par donjon.gd pour choisir le point d'apparition.
+##   "village" → arrivé depuis le village (spawn près des escaliers montants)
+##   "above"   → descendu depuis un étage supérieur (spawn près des escaliers montants)
+##   "below"   → remonté depuis un étage inférieur (spawn près des escaliers descendants)
+var player_came_from: String = "village"
+
+# -------------------------
+
 var item_definitions := {
 	"healing_potion": {
 		"display_name": "Healing Potion",
@@ -38,12 +70,6 @@ var item_definitions := {
 }
 
 var choice := ""
-
-# position temporaire pour le prochain spawn (appliquée une fois)
-var next_spawn_position: Vector2 = Vector2.ZERO
-var next_spawn_once: bool = false
-var house_return_spawn_position: Vector2 = Vector2.ZERO
-var house_return_spawn_once: bool = false
 
 const QUEST_STATUS_NOT_STARTED := "not_started"
 const QUEST_STATUS_IN_PROGRESS := "in_progress"
@@ -136,6 +162,10 @@ func _build_state_payload() -> Dictionary:
 		"assigned_action_item": assigned_action_item,
 		"quests": quests.duplicate(true),
 		"choice": choice,
+		# Étages — permet de reprendre une session en cours
+		"current_floor": current_floor,
+		"dungeon_master_seed": dungeon_master_seed,
+		"player_came_from": player_came_from,
 	}
 
 	# include fog discovered cells if FogOfWar node present
@@ -155,6 +185,11 @@ func _apply_state_payload(state: Dictionary) -> void:
 	assigned_action_item = String(state.get("assigned_action_item", ""))
 	quests = _normalize_dict(state.get("quests", quests))
 	choice = String(state.get("choice", choice))
+
+	# Restauration de l'état d'étage
+	current_floor = int(state.get("current_floor", 1))
+	dungeon_master_seed = int(state.get("dungeon_master_seed", 0))
+	player_came_from = String(state.get("player_came_from", "village"))
 
 	_rebuild_inventory_from_counts()
 	_validate_assigned_action_item()
@@ -208,6 +243,51 @@ func _queue_save_if_ready() -> void:
 	if _is_applying_state:
 		return
 	queue_save()
+
+# =========================================================
+# NAVIGATION INTER-ÉTAGES
+# =========================================================
+
+## Retourne la seed de bruit pour l'étage donné.
+## Déterministe : même étage + même dungeon_master_seed → même layout.
+func get_floor_seed(floor_num: int) -> int:
+	if dungeon_master_seed == 0:
+		dungeon_master_seed = randi() | 1  # Jamais 0
+	# Multiplication par un nombre premier pour bien disperser les seeds
+	return (dungeon_master_seed + floor_num * 7919) & 0x7FFFFFFF
+
+
+## Appelé par la porte du village quand le joueur entre dans le donjon.
+## Génère une seed maîtresse fraîche → nouveau run, nouvelles salles.
+func enter_dungeon() -> void:
+	current_floor = 1
+	player_came_from = "village"
+	dungeon_master_seed = randi() | 1
+	_queue_save_if_ready()
+
+
+## Descendre d'un étage (escaliers ▼).
+func go_to_floor_below() -> void:
+	current_floor += 1
+	player_came_from = "above"
+	_queue_save_if_ready()
+
+
+## Remonter d'un étage (escaliers ▲).
+## Appelé uniquement si current_floor > 1 (sinon on sort vers le village).
+func go_to_floor_above() -> void:
+	current_floor = max(1, current_floor - 1)
+	player_came_from = "below"
+	_queue_save_if_ready()
+
+
+## Retour au village depuis l'étage 1 (escaliers ▲ à l'étage 1).
+func exit_dungeon_to_village() -> void:
+	current_floor = 1
+	player_came_from = "village"
+	_queue_save_if_ready()
+
+# =========================================================
 
 func add_item(item_name: String, amount: int = 1) -> void:
 	if amount <= 0:

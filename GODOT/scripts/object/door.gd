@@ -6,6 +6,10 @@ extends Area2D
 
 @export var target_scene: String = "res://maps/village.tscn"
 
+## Cocher sur la porte du village qui mène au donjon.
+## Déclenche GameState.enter_dungeon() → nouvelle seed, étage 1.
+@export var is_dungeon_entrance: bool = false
+
 var player_in_area := false
 var is_in_dialogue := false
 
@@ -13,20 +17,18 @@ var is_in_dialogue := false
 func action():
 	if not player_in_area:
 		return
-	
 	if is_in_dialogue:
 		return
-
 	start_dialogue()
 
 
 func start_dialogue():
 	var balloon = DialogueManager.show_dialogue_balloon(_get_dialogue_resource(), dialogue_start)
-	
+
 	if balloon == null:
 		print("Erreur : dialogue introuvable")
 		return
-	
+
 	is_in_dialogue = true
 	balloon.tree_exited.connect(_on_dialogue_finished, CONNECT_ONE_SHOT)
 
@@ -40,6 +42,7 @@ func _on_dialogue_finished():
 	# reset
 	GameState.choice = ""
 
+
 func _get_dialogue_resource() -> Resource:
 	var locale_manager = get_node_or_null("/root/LocaleManager")
 	if locale_manager and locale_manager.has_method("get_locale"):
@@ -52,9 +55,13 @@ func _get_dialogue_resource() -> Resource:
 func teleport():
 	if target_scene == "":
 		return
-	
-	# ­ƒÆ¥ sauvegarde AVANT de quitter le donjon
-	GameState.save_gold()
+
+	if is_dungeon_entrance:
+		# Entrée dans le donjon depuis le village → nouveau run, seed fraîche
+		GameState.enter_dungeon()
+	else:
+		# Sortie du donjon vers le village → sauvegarder l'or
+		GameState.save_gold()
 
 	get_tree().change_scene_to_file(target_scene)
 

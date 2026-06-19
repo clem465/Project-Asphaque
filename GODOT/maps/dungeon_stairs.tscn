@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Texture2D" uid="uid://by76coc8sptpo" path="res://assets/object/pngtree-old-wooden-door-of-castle-png-image_12516559.png" id="1_door_tex"]
+[ext_resource type="Script" path="res://scripts/map/dungeon_stairs.gd" id="2_stairs_script"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_stairs"]
+atlas = ExtResource("1_door_tex")
+region = Rect2(0, 0, 360, 360)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_stairs"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_stairs")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_stairs"]
+size = Vector2(265, 340.00003)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_stairs"]
+radius = 208.29066
+
+[node name="DungeonStairs" type="Area2D"]
+scale = Vector2(0.1, 0.1)
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("2_stairs_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(180, 180)
+sprite_frames = SubResource("SpriteFrames_stairs")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(180, 300)
+shape = SubResource("CircleShape2D_stairs")
+
+[node name="CollisionBody" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionBody"]
+position = Vector2(179.49998, 180.00002)
+shape = SubResource("RectangleShape2D_stairs")

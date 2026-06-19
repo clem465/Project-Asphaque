@@ -1,6 +1,7 @@
 extends TileMap
 
 var noise := FastNoiseLite.new()
+var entity_rng := RandomNumberGenerator.new()
 
 const SIZE := Vector2i(80, 60)
 const SOURCE_ID := 0
@@ -18,6 +19,14 @@ const MIN_DISTANCE_FROM_SPAWN := 6
 const CHEST_SCENE = preload("res://scenes/object/chest.tscn")
 const CHEST_COUNT := 6
 const MIN_DISTANCE_CHEST_FROM_SPAWN := 5
+
+# -------------------------
+# ESCALIERS
+# -------------------------
+## Scène réutilisant le sprite et la hitbox de la porte d'origine.
+const STAIRS_SCENE = preload("res://maps/dungeon_stairs.tscn")
+const MIN_DISTANCE_STAIRS_FROM_SPAWN := 10
+const MIN_DISTANCE_BETWEEN_STAIRS := 18
 
 # -------------------------
 # TILES
@@ -40,11 +49,18 @@ const CORNER_BR := Vector2i(6, 6)
 const SPAWN_POS := Vector2i(40, 30)
 const SPAWN_RADIUS := 4
 
+var _stairs_up_pos := Vector2i.ZERO
+var _stairs_down_pos := Vector2i.ZERO
+
+
 func _ready():
-	randomize()
-	noise.seed = randi()
+	noise.seed = GameState.get_floor_seed(GameState.current_floor)
 	noise.frequency = 0.08
+	entity_rng.seed = noise.seed + 99991
 	generate()
+	call_deferred("_move_player_to_entry")
+	print("=== Donjon étage %d | seed %d ===" % [GameState.current_floor, noise.seed])
+
 
 # -------------------------
 # GENERATION
@@ -82,13 +98,110 @@ func generate():
 	# 6. tiles
 	place_tiles(grid)
 
-	# 7. spawn coffres ✅
+	# 7. escaliers en premier (pour exclure leurs positions)
+	spawn_stairs(grid)
+
+	# 8. coffres
 	spawn_chests(grid)
 
-	# 8. spawn monstres
+	# 9. monstres
 	spawn_monsters(grid)
 
-	print("Spawn joueur:", SPAWN_POS)
+
+# -------------------------
+# ESCALIERS
+# -------------------------
+func _find_safe_tiles(grid):
+	var safe = []
+	for x in range(2, SIZE.x - 2):
+		for y in range(2, SIZE.y - 2):
+			if not grid[x][y]:
+				continue
+			var pos = Vector2i(x, y)
+			if pos.distance_to(SPAWN_POS) < MIN_DISTANCE_STAIRS_FROM_SPAWN:
+				continue
+			var all_floor = true
+			for dx in range(-1, 2):
+				for dy in range(-1, 2):
+					if not grid[x + dx][y + dy]:
+						all_floor = false
+						break
+				if not all_floor:
+					break
+			if all_floor:
+				safe.append(pos)
+	return safe
+
+
+func spawn_stairs(grid):
+	var safe_tiles = _find_safe_tiles(grid)
+
+	if safe_tiles.size() < 2:
+		push_error("[donjon] Pas assez de tuiles sûres pour les escaliers (trouvé : %d)" % safe_tiles.size())
+		return
+
+	# Escaliers montants : position aléatoire (déterministe via entity_rng)
+	var idx_up = entity_rng.randi() % safe_tiles.size()
+	_stairs_up_pos = safe_tiles[idx_up]
+
+	# Escaliers descendants : tuile la plus éloignée des montants
+	var best_dist = 0.0
+	var best_idx = -1
+	for i in range(safe_tiles.size()):
+		if i == idx_up:
+			continue
+		var d = float(safe_tiles[i].distance_to(_stairs_up_pos))
+		if d > best_dist and d >= MIN_DISTANCE_BETWEEN_STAIRS:
+			best_dist = d
+			best_idx = i
+
+	# Fallback si aucune tile assez éloignée
+	if best_idx == -1:
+		for i in range(safe_tiles.size()):
+			if i == idx_up:
+				continue
+			var d = float(safe_tiles[i].distance_to(_stairs_up_pos))
+			if d > best_dist:
+				best_dist = d
+				best_idx = i
+
+	if best_idx == -1:
+		push_error("[donjon] Impossible de séparer les deux escaliers")
+		return
+
+	_stairs_down_pos = safe_tiles[best_idx]
+
+	var stair_up = STAIRS_SCENE.instantiate()
+	stair_up.direction = "up"
+	stair_up.position = map_to_local(_stairs_up_pos) + Vector2(8, 8)
+	add_child(stair_up)
+
+	var stair_down = STAIRS_SCENE.instantiate()
+	stair_down.direction = "down"
+	stair_down.position = map_to_local(_stairs_down_pos) + Vector2(8, 8)
+	add_child(stair_down)
+
+	print("Escaliers ▲ : %s | ▼ : %s" % [_stairs_up_pos, _stairs_down_pos])
+
+
+# -------------------------
+# PLACEMENT DU JOUEUR
+# -------------------------
+func _move_player_to_entry():
+	var players = get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return
+	var player = players[0]
+
+	var target_grid_pos
+	match GameState.player_came_from:
+		"below":
+			target_grid_pos = _stairs_down_pos if _stairs_down_pos != Vector2i.ZERO else SPAWN_POS
+		_:
+			target_grid_pos = _stairs_up_pos if _stairs_up_pos != Vector2i.ZERO else SPAWN_POS
+
+	player.global_position = map_to_local(target_grid_pos) + Vector2(8, 24)
+
 
 # -------------------------
 # SPAWN COFFRES
@@ -96,40 +209,34 @@ func generate():
 func spawn_chests(grid):
 	var spawned = 0
 	var attempts = 0
-	var max_attempts = CHEST_COUNT * 40  # + d'essais car plus restrictif
+	var max_attempts = CHEST_COUNT * 40
 
 	var used_positions = []
+	if _stairs_up_pos != Vector2i.ZERO:
+		used_positions.append(_stairs_up_pos)
+	if _stairs_down_pos != Vector2i.ZERO:
+		used_positions.append(_stairs_down_pos)
 
 	while spawned < CHEST_COUNT and attempts < max_attempts:
 		attempts += 1
 
-		var x = randi() % SIZE.x
-		var y = randi() % SIZE.y
+		var x = entity_rng.randi() % SIZE.x
+		var y = entity_rng.randi() % SIZE.y
 		var pos = Vector2i(x, y)
 
-		# -------------------------
-		# CONDITIONS
-		# -------------------------
-
-		# Doit être du sol
 		if not grid[x][y]:
 			continue
-
-		# Pas trop proche du spawn
 		if pos.distance_to(SPAWN_POS) < MIN_DISTANCE_CHEST_FROM_SPAWN:
 			continue
 
-		# ❌ Éviter les coffres collés entre eux
 		var too_close = false
 		for other in used_positions:
-			if pos.distance_to(other) < 6:  # distance minimale entre coffres
+			if pos.distance_to(other) < 6:
 				too_close = true
 				break
-
 		if too_close:
 			continue
 
-		# ❌ Éviter murs proches (plus joli)
 		var near_wall = false
 		for dx in range(-1, 2):
 			for dy in range(-1, 2):
@@ -137,23 +244,18 @@ func spawn_chests(grid):
 					continue
 				if not grid[x + dx][y + dy]:
 					near_wall = true
-
 		if near_wall:
 			continue
 
-		# -------------------------
-		# SPAWN
-		# -------------------------
 		var chest = CHEST_SCENE.instantiate()
-		var world_pos = map_to_local(pos) + Vector2(8, 8)
-		chest.position = world_pos
-
+		chest.position = map_to_local(pos) + Vector2(8, 8)
 		add_child(chest)
 
 		used_positions.append(pos)
 		spawned += 1
 
 	print("Coffres spawn:", spawned)
+
 
 # -------------------------
 # CONNECTIVITÉ
@@ -167,24 +269,18 @@ func keep_connected_area(grid):
 
 		if visited.has(current):
 			continue
-
 		visited[current] = true
 
 		var dirs = [
-			Vector2i(1, 0),
-			Vector2i(-1, 0),
-			Vector2i(0, 1),
-			Vector2i(0, -1)
+			Vector2i(1, 0), Vector2i(-1, 0),
+			Vector2i(0, 1), Vector2i(0, -1)
 		]
-
 		for d in dirs:
 			var nx = current.x + d.x
 			var ny = current.y + d.y
-
 			if in_bounds(nx, ny) and grid[nx][ny]:
 				stack.append(Vector2i(nx, ny))
 
-	# Supprimer zones isolées
 	for x in range(SIZE.x):
 		for y in range(SIZE.y):
 			var pos = Vector2i(x, y)
@@ -192,6 +288,7 @@ func keep_connected_area(grid):
 				grid[x][y] = false
 
 	return grid
+
 
 # -------------------------
 # SPAWN MONSTRES
@@ -202,33 +299,34 @@ func spawn_monsters(grid):
 	var max_attempts = MONSTER_COUNT * 20
 
 	var used_positions = []
+	if _stairs_up_pos != Vector2i.ZERO:
+		used_positions.append(_stairs_up_pos)
+	if _stairs_down_pos != Vector2i.ZERO:
+		used_positions.append(_stairs_down_pos)
 
 	while spawned < MONSTER_COUNT and attempts < max_attempts:
 		attempts += 1
 
-		var x = randi() % SIZE.x
-		var y = randi() % SIZE.y
+		var x = entity_rng.randi() % SIZE.x
+		var y = entity_rng.randi() % SIZE.y
 		var pos = Vector2i(x, y)
 
 		if not grid[x][y]:
 			continue
-
 		if pos.distance_to(SPAWN_POS) < MIN_DISTANCE_FROM_SPAWN:
 			continue
-
 		if used_positions.has(pos):
 			continue
 
 		var monster = MONSTER_SCENE.instantiate()
-		var world_pos = map_to_local(pos) + Vector2(8, 8)
-		monster.position = world_pos
-
+		monster.position = map_to_local(pos) + Vector2(8, 8)
 		add_child(monster)
 
 		used_positions.append(pos)
 		spawned += 1
 
 	print("Monstres spawn:", spawned)
+
 
 # -------------------------
 # SMOOTH
@@ -242,11 +340,10 @@ func smooth(grid, iterations):
 		for x in range(SIZE.x):
 			new_grid.append([])
 			for y in range(SIZE.y):
-
 				var count = 0
 
-				for nx in range(x-1, x+2):
-					for ny in range(y-1, y+2):
+				for nx in range(x - 1, x + 2):
+					for ny in range(y - 1, y + 2):
 						if nx == x and ny == y:
 							continue
 						if in_bounds(nx, ny) and current[nx][ny]:
@@ -258,6 +355,7 @@ func smooth(grid, iterations):
 
 	return current
 
+
 # -------------------------
 # TILE PLACEMENT
 # -------------------------
@@ -265,12 +363,11 @@ func place_tiles(grid):
 	for x in range(SIZE.x):
 		for y in range(SIZE.y):
 			var pos = Vector2i(x, y)
-
 			if grid[x][y]:
 				set_cell(0, pos, SOURCE_ID, FLOOR)
 			else:
-				var tile = get_wall_tile(grid, x, y)
-				set_cell(0, pos, SOURCE_ID, tile)
+				set_cell(0, pos, SOURCE_ID, get_wall_tile(grid, x, y))
+
 
 # -------------------------
 # AUTOTILE
@@ -281,25 +378,18 @@ func get_wall_tile(grid, x, y):
 	var s = is_floor(grid, x, y + 1)
 	var w = is_floor(grid, x - 1, y)
 
-	if n and w and not e and not s:
-		return CORNER_TL
-	if n and e and not w and not s:
-		return CORNER_TR
-	if s and w and not n and not e:
-		return CORNER_BL
-	if s and e and not n and not w:
-		return CORNER_BR
+	if n and w and not e and not s: return CORNER_TL
+	if n and e and not w and not s: return CORNER_TR
+	if s and w and not n and not e: return CORNER_BL
+	if s and e and not n and not w: return CORNER_BR
 
-	if n:
-		return WALL_TOP
-	if s:
-		return WALL_BOTTOM
-	if w:
-		return WALL_LEFT
-	if e:
-		return WALL_RIGHT
+	if n: return WALL_TOP
+	if s: return WALL_BOTTOM
+	if w: return WALL_LEFT
+	if e: return WALL_RIGHT
 
 	return WALL_TOP
+
 
 # -------------------------
 # UTILS

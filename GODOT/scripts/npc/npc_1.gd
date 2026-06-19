@@ -2,7 +2,7 @@ extends Area2D
 
 @export var target_scene: PackedScene
 @export var target_spawn_point: String = "Entrance"
-
+@export var is_dungeon_entrance: bool = true
 var player_in_range = false
 
 func _ready():
