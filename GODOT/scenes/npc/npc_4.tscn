@@ -2,9 +2,10 @@
 
 [ext_resource type="Texture2D" uid="uid://bx2l7bx575cpn" path="res://assets/npc/NPC_Characters_v1.0/Male3.png" id="1_legcr"]
 [ext_resource type="PackedScene" uid="uid://bhho1kj35s4cp" path="res://helpers/actionable.tscn" id="2_5v1qa"]
-[ext_resource type="Script" uid="uid://cvfpppb6lgjvh" path="res://scripts/npc/npc_3.gd" id="3_fq7w3"]
-[ext_resource type="Resource" uid="uid://bsrjuo7o1jyxt" path="res://dialogue/questgiver.dialogue" id="4_rhtun"]
-[ext_resource type="Resource" uid="uid://dnsvh3xqwv0lu" path="res://dialogue/questgiver_en.dialogue" id="5_w7vfe"]
+[ext_resource type="Script" uid="uid://b3wy33do1vi1h" path="res://scripts/npc/npc_4.gd" id="3_ad5wd"]
+[ext_resource type="Resource" uid="uid://dfdcuq3ffs23f" path="res://dialogue/blacksmith.dialogue" id="4_legcr"]
+[ext_resource type="Resource" uid="uid://oqu1h3o6457f" path="res://dialogue/blacksmith_en.dialogue" id="5_5v1qa"]
+[ext_resource type="PackedScene" uid="uid://bfnmoqdeaf8dw" path="res://scenes/npc/UI/Shop_weapon.tscn" id="6_5v1qa"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hjsua"]
 atlas = ExtResource("1_legcr")
@@ -61,10 +62,10 @@ frame_progress = 0.06959828
 shape = SubResource("RectangleShape2D_wkgsq")
 
 [node name="Actionable" parent="." unique_id=130623042 instance=ExtResource("2_5v1qa")]
-script = ExtResource("3_fq7w3")
-dialogue_resource = ExtResource("4_rhtun")
-dialogue_resource_en = ExtResource("5_w7vfe")
-quest_id = "slime_cleanup"
+script = ExtResource("3_ad5wd")
+dialogue_resource = ExtResource("4_legcr")
+dialogue_resource_en = ExtResource("5_5v1qa")
+shop_ui_scene = ExtResource("6_5v1qa")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Actionable" unique_id=838763148]
 position = Vector2(1, 0)

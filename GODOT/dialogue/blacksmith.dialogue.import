@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://dfdcuq3ffs23f"
+path="res://.godot/imported/blacksmith.dialogue-012d4b8c79e0b44043522b4b08543861.tres"
+
+[deps]
+
+source_file="res://dialogue/blacksmith.dialogue"
+dest_files=["res://.godot/imported/blacksmith.dialogue-012d4b8c79e0b44043522b4b08543861.tres"]
+
+[params]
+
+defaults=true

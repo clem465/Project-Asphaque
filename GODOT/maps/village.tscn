@@ -393,9 +393,14 @@ position = Vector2(154, 82)
 
 [node name="EnterHouse" parent="." unique_id=850861033 instance=ExtResource("7_la0qa")]
 position = Vector2(-17, 83)
-return_spawn_offset = Vector2(0, 0)
+return_spawn_offset = Vector2(10, 20)
 
 [node name="EnterHouse2" parent="." unique_id=1068794178 instance=ExtResource("7_la0qa")]
 position = Vector2(255, 83)
 target_scene = "res://maps/house2.tscn"
+return_spawn_offset = Vector2(10, 20)
+
+[node name="EnterHouse3" parent="." unique_id=286432684 instance=ExtResource("7_la0qa")]
+position = Vector2(191, 243)
+target_scene = "res://maps/house3.tscn"
 return_spawn_offset = Vector2(10, 20)

@@ -1,0 +1,19 @@
+~ start
+Forgeron: Bienvenue aventurier !
+Forgeron: J’ai de quoi t’équiper si tu as assez d’or.
+Forgeron: Tu veux voir mes marchandises ?
+
+- Oui => open_shop
+- Non => leave
+
+
+~ open_shop
+do GameState.choice = "yes"
+Forgeron: Très bien, regarde ce que j’ai à vendre !
+=> END
+
+
+~ leave
+do GameState.choice = "no"
+Forgeron: Dommage… reviens quand tu seras prêt.
+=> END

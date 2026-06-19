@@ -1,0 +1,19 @@
+~ start
+Blacksmith: Welcome adventurer!
+Blacksmith: I have what you need if you have enough gold.
+Blacksmith: Do you want to see my goods?
+
+- Yes => open_shop
+- No => leave
+
+
+~ open_shop
+do GameState.choice = "yes"
+Blacksmith: Very well, look what I have to sell!
+=> END
+
+
+~ leave
+do GameState.choice = "no"
+Blacksmith: Too bad... come back when you’re ready.
+=> END

@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://bhho1kj35s4cp" path="res://helpers/actionable.tscn" id="2_3q1wi"]
 [ext_resource type="Script" uid="uid://cmoj8sd5ggx0g" path="res://scripts/npc/npc_2.gd" id="3_foycd"]
 [ext_resource type="Resource" uid="uid://ln6xnvxeyhm4" path="res://dialogue/shopkeeper.dialogue" id="4_3rp44"]
+[ext_resource type="Resource" uid="uid://dacsujxsei0ci" path="res://dialogue/shopkeeper_en.dialogue" id="5_2nhiv"]
 [ext_resource type="PackedScene" uid="uid://wi8kq04pwaem" path="res://scenes/npc/UI/Shop.tscn" id="5_3q1wi"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g644d"]
@@ -64,6 +65,7 @@ shape = SubResource("RectangleShape2D_p4nnn")
 [node name="Actionable" parent="." unique_id=130623042 instance=ExtResource("2_3q1wi")]
 script = ExtResource("3_foycd")
 dialogue_resource = ExtResource("4_3rp44")
+dialogue_resource_en = ExtResource("5_2nhiv")
 shop_ui_scene = ExtResource("5_3q1wi")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Actionable" unique_id=1177984130]
