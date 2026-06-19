@@ -21,8 +21,8 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_doydo"]
 size = Vector2(265, 340.00003)
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_xpe8u"]
-radius = 208.29066
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jrxhm"]
+size = Vector2(420.00018, 470.00012)
 
 [node name="Door" type="Area2D" unique_id=1867020924]
 scale = Vector2(0.1, 0.1)
@@ -49,7 +49,9 @@ script = ExtResource("1_4v2mi")
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=1022748798]
-shape = SubResource("CircleShape2D_xpe8u")
+position = Vector2(1.5258789e-05, -104.999954)
+scale = Vector2(0.9999994, 0.9999994)
+shape = SubResource("RectangleShape2D_jrxhm")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
 [connection signal="body_exited" from="." to="." method="_on_body_exited"]

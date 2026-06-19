@@ -774,7 +774,7 @@ script = ExtResource("1_mod63")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=218171934]
 sprite_frames = SubResource("SpriteFrames_y4r1p")
-animation = &"die"
+animation = &"idle_down"
 autoplay = "idle_down"
 metadata/_edit_lock_ = true
 
