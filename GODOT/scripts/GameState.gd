@@ -282,9 +282,11 @@ func go_to_floor_above() -> void:
 
 
 ## Retour au village depuis l'étage 1 (escaliers ▲ à l'étage 1).
+## Reset la seed : le prochain run généré sera forcément différent.
 func exit_dungeon_to_village() -> void:
 	current_floor = 1
 	player_came_from = "village"
+	dungeon_master_seed = 0
 	_queue_save_if_ready()
 
 # =========================================================
