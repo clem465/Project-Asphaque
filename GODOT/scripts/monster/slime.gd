@@ -22,6 +22,7 @@ extends CharacterBody2D
 
 var health := max_health
 var invulnerable := false
+var is_dead := false
 
 # -------------------------
 # IA
@@ -61,19 +62,16 @@ func _ready():
 	_pick_new_direction()
 	_fog_ref = null
 
-	# ­ƒöÑ init barre de vie
 	health_bar.max_value = max_health
 	health_bar.value = health
 	health_bar.visibility_layer = 2
 
-	# ­ƒƒ® STYLE PROPRE (Godot 4)
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.2, 0.2, 0.2)
 
 	var fill = StyleBoxFlat.new()
 	fill.bg_color = Color(0.2, 0.8, 0.2)
 
-	# Ô£à BONNE M├ëTHODE GODOT 4
 	health_bar.set("theme_override_styles/background", bg)
 	health_bar.set("theme_override_styles/fill", fill)
 
@@ -81,6 +79,9 @@ func _ready():
 # PHYSICS
 # -------------------------
 func _physics_process(delta):
+
+	if is_dead:
+		return
 
 	if is_attacking:
 		move_and_slide()
@@ -118,15 +119,19 @@ func _chase(delta):
 # -------------------------
 # ATTAQUE
 # -------------------------
-
 func _try_attack():
+
+	if is_dead:
+		return
+
 	if not player_in_hitbox or not can_attack or target == null:
 		return
 
 	_attack()
 
 func _attack():
-	if not is_inside_tree():
+
+	if not is_inside_tree() or is_dead:
 		return
 
 	is_attacking = true
@@ -135,8 +140,10 @@ func _attack():
 
 	anim.play("attack_" + last_dir)
 
-	# moment où le coup touche
-	await get_tree().create_timer(0.1).timeout
+	await get_tree().create_timer(0.35).timeout
+
+	if is_dead:
+		return
 
 	if is_inside_tree() and player_in_hitbox:
 		if target and is_instance_valid(target) and target.has_method("take_damage"):
@@ -146,7 +153,7 @@ func _attack():
 	if tree:
 		await tree.create_timer(attack_cooldown).timeout
 
-	if not is_inside_tree():
+	if is_dead or not is_inside_tree():
 		return
 
 	is_attacking = false
@@ -177,11 +184,16 @@ func _pick_new_direction():
 # DETECTION
 # -------------------------
 func _on_sight_body_entered(body):
+
+	if is_dead:
+		return
+
 	if body.is_in_group("player"):
 		target = body
 		state = State.CHASE
 
 func _on_sight_body_exited(body):
+
 	if body == target:
 		target = null
 		state = State.WANDER
@@ -190,18 +202,26 @@ func _on_sight_body_exited(body):
 # HITBOX
 # -------------------------
 func _on_hitbox_body_entered(body):
+
+	if is_dead:
+		return
+
 	if body.is_in_group("player"):
 		player_in_hitbox = true
 		target = body
 
 func _on_hitbox_body_exited(body):
+
 	if body.is_in_group("player"):
 		player_in_hitbox = false
 
 # -------------------------
-# D├ëG├éTS + EFFET ROUGE ­ƒö┤
+# DÉGÂTS
 # -------------------------
 func take_damage(amount: int, source_position: Vector2):
+
+	if is_dead:
+		return
 
 	if invulnerable:
 		return
@@ -213,37 +233,56 @@ func take_damage(amount: int, source_position: Vector2):
 
 	health_bar.value = health
 
-	# ­ƒö┤ FLASH ROUGE
 	anim.modulate = Color(1, 0.2, 0.2)
 
-	# ­ƒÆÑ knockback
 	var dir = (global_position - source_position).normalized()
 	velocity += dir * 80
 
 	if health <= 0:
 		die()
+		return
 
-	# ÔÅ▒´©Å reset couleur
 	await get_tree().create_timer(0.1).timeout
-	anim.modulate = Color(1, 1, 1)
+
+	if not is_dead:
+		anim.modulate = Color.WHITE
 
 	await get_tree().create_timer(0.3).timeout
-	invulnerable = false
+
+	if not is_dead:
+		invulnerable = false
 
 # -------------------------
 # MORT
 # -------------------------
 func die():
-	# emp├¬che toute action
+
+	if is_dead:
+		return
+
+	is_dead = true
+
 	set_physics_process(false)
+
 	velocity = Vector2.ZERO
 	is_attacking = false
 	can_attack = false
 
-	# joue l'animation de mort
+	target = null
+	player_in_hitbox = false
+
+	for child in get_children():
+		if child is CollisionShape2D:
+			child.set_deferred("disabled", true)
+
+	if hitbox:
+		for child in hitbox.get_children():
+			if child is CollisionShape2D:
+				child.set_deferred("disabled", true)
+
+	anim.modulate = Color.WHITE
 	anim.play("die_" + last_dir)
 
-	# attendre que l'animation se termine
 	await anim.animation_finished
 
 	if GameState.has_method("add_kill"):
@@ -251,14 +290,15 @@ func die():
 
 	_spawn_coin_drop()
 
-	# supprimer le slime
 	queue_free()
 
 func _spawn_coin_drop() -> void:
+
 	if coin_drop_scene == null:
 		return
 
 	var root: Node = get_tree().current_scene
+
 	if root == null:
 		return
 
@@ -266,14 +306,14 @@ func _spawn_coin_drop() -> void:
 	root.add_child(coin_instance)
 
 	if coin_instance is Node2D:
-		(coin_instance as Node2D).global_position = global_position
+		coin_instance.global_position = global_position
 
 # -------------------------
 # ANIMATION
 # -------------------------
 func _update_animation(vel):
 
-	if is_attacking:
+	if is_attacking or is_dead:
 		return
 
 	if vel.length() < 1:
@@ -291,15 +331,22 @@ func _update_animation(vel):
 # UI
 # -------------------------
 func _process(delta):
-	health_bar.visible = health < max_health
+
+	health_bar.visible = health < max_health and not is_dead
+
 	_update_minimap_visibility_layer()
 	_update_visibility_by_fog()
 
 func _update_visibility_by_fog() -> void:
+
+	if is_dead:
+		return
+
 	if _fog_ref == null or not is_instance_valid(_fog_ref):
 		var root = get_tree().current_scene
 		if root:
 			_fog_ref = root.get_node_or_null("FogOfWar")
+
 	if _fog_ref == null or not is_instance_valid(_fog_ref):
 		return
 
@@ -319,22 +366,27 @@ func _update_visibility_by_fog() -> void:
 		_was_visible_under_fog = false
 
 func _update_minimap_visibility_layer() -> void:
+
 	var player := _get_minimap_player_ref()
+
 	if player == null:
 		visibility_layer = 1
 		return
 
 	var radius_sq: float = minimap_live_radius_world * minimap_live_radius_world
+
 	if global_position.distance_squared_to(player.global_position) <= radius_sq:
 		visibility_layer = 1
 	else:
 		visibility_layer = 2
 
 func _get_minimap_player_ref() -> Node2D:
+
 	if minimap_player_ref and is_instance_valid(minimap_player_ref):
 		return minimap_player_ref
 
 	var candidate: Node = get_tree().get_first_node_in_group("player")
+
 	if candidate is Node2D:
 		minimap_player_ref = candidate
 
