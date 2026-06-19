@@ -9,9 +9,15 @@ const SOURCE_ID := 0
 # -------------------------
 # MONSTRES
 # -------------------------
-const MONSTER_SCENE = preload("res://scenes/monster/slime.tscn")
+const SLIME_1_SCENE = preload("res://scenes/monster/slime.tscn")
+const SLIME_2_SCENE = preload("res://scenes/monster/slime2.tscn")
+const SLIME_3_SCENE = preload("res://scenes/monster/slime3.tscn")
+
 const MONSTER_COUNT := 15
 const MIN_DISTANCE_FROM_SPAWN := 6
+
+# Nombre minimum de Slime 3 par étage
+const MIN_SLIME3_PER_FLOOR := 1
 
 # -------------------------
 # COFFRES
@@ -293,39 +299,99 @@ func keep_connected_area(grid):
 # -------------------------
 # SPAWN MONSTRES
 # -------------------------
-func spawn_monsters(grid):
-	var spawned = 0
-	var attempts = 0
-	var max_attempts = MONSTER_COUNT * 20
+func get_random_monster_scene() -> PackedScene:
+	var roll := entity_rng.randi_range(1, 100)
 
-	var used_positions = []
+	# Slime 1 : commun
+	if roll <= 75:
+		return SLIME_1_SCENE
+
+	# Slime 2 : rare
+	if roll <= 97:
+		return SLIME_2_SCENE
+
+	# Slime 3 : très rare
+	return SLIME_3_SCENE
+
+func spawn_monsters(grid):
+
+	var spawned := 0
+	var attempts := 0
+	var max_attempts := MONSTER_COUNT * 20
+
+	var used_positions := []
+
 	if _stairs_up_pos != Vector2i.ZERO:
 		used_positions.append(_stairs_up_pos)
+
 	if _stairs_down_pos != Vector2i.ZERO:
 		used_positions.append(_stairs_down_pos)
+
+	var monster_positions: Array[Vector2i] = []
+	var monsters: Array[Node] = []
 
 	while spawned < MONSTER_COUNT and attempts < max_attempts:
 		attempts += 1
 
 		var x = entity_rng.randi() % SIZE.x
 		var y = entity_rng.randi() % SIZE.y
-		var pos = Vector2i(x, y)
+
+		var pos := Vector2i(x, y)
 
 		if not grid[x][y]:
 			continue
+
 		if pos.distance_to(SPAWN_POS) < MIN_DISTANCE_FROM_SPAWN:
 			continue
+
 		if used_positions.has(pos):
 			continue
 
-		var monster = MONSTER_SCENE.instantiate()
+		var scene := get_random_monster_scene()
+
+		var monster = scene.instantiate()
 		monster.position = map_to_local(pos) + Vector2(8, 8)
+
 		add_child(monster)
+
+		monsters.append(monster)
+		monster_positions.append(pos)
 
 		used_positions.append(pos)
 		spawned += 1
 
-	print("Monstres spawn:", spawned)
+	# Garantie d'au moins un Slime 3
+	var slime3_count := 0
+
+	for monster in monsters:
+		if monster.scene_file_path.ends_with("slime3.tscn"):
+			slime3_count += 1
+
+	while slime3_count < MIN_SLIME3_PER_FLOOR and monsters.size() > 0:
+
+		var replace_index := entity_rng.randi() % monsters.size()
+
+		var old_monster = monsters[replace_index]
+		var pos = monster_positions[replace_index]
+
+		if is_instance_valid(old_monster):
+			old_monster.queue_free()
+
+		var slime3 = SLIME_3_SCENE.instantiate()
+		slime3.position = map_to_local(pos) + Vector2(8, 8)
+
+		add_child(slime3)
+
+		monsters[replace_index] = slime3
+
+		slime3_count += 1
+
+	print(
+		"Monstres spawn : ",
+		spawned,
+		" | Slime3 : ",
+		slime3_count
+	)
 
 
 # -------------------------
