@@ -21,6 +21,11 @@ var health := 0
 
 func _ready() -> void:
 	add_to_group("player")
+	_apply_saved_progression_stats()
+	if not GameState.player_stats_increased.is_connected(_on_player_stats_increased):
+		GameState.player_stats_increased.connect(_on_player_stats_increased)
+	if not GameState.experience_gained.is_connected(_on_experience_gained):
+		GameState.experience_gained.connect(_on_experience_gained)
 	health = max_health
 	_base_speed = speed
 
@@ -205,6 +210,52 @@ func get_attack_value() -> int:
 
 func get_defense_value() -> int:
 	return defense
+
+
+func get_level_value() -> int:
+	return GameState.player_level
+
+
+func get_experience_value() -> int:
+	return GameState.player_exp
+
+
+func get_experience_to_next_value() -> int:
+	return GameState.player_exp_to_next
+
+
+func _apply_saved_progression_stats() -> void:
+	if GameState.has_method("get_player_max_health_bonus"):
+		max_health += GameState.get_player_max_health_bonus()
+
+	if GameState.has_method("get_player_attack_bonus"):
+		attack_damage += GameState.get_player_attack_bonus()
+
+	if GameState.has_method("get_player_defense_bonus"):
+		defense += GameState.get_player_defense_bonus()
+
+
+func _on_player_stats_increased(max_health_gain: int, attack_gain: int, defense_gain: int) -> void:
+	max_health += max_health_gain
+	health = mini(health + max_health_gain, max_health)
+	attack_damage += attack_gain
+	defense += defense_gain
+
+
+func _on_experience_gained(amount: int) -> void:
+	var label := Label.new()
+	add_child(label)
+	label.text = "+%d XP" % amount
+	label.modulate = Color(0.45, 0.85, 1.0)
+	label.add_theme_font_size_override("font_size", 18)
+	label.position = Vector2(-10, -42)
+
+	var tween := create_tween()
+	tween.tween_property(label, "position:y", label.position.y - 34, 0.8)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.8)
+
+	await tween.finished
+	label.queue_free()
 
 
 func get_coins() -> int:

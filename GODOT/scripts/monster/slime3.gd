@@ -57,6 +57,7 @@ var player_in_hitbox := false
 var minimap_player_ref: Node2D = null
 var _fog_ref = null
 var _was_visible_under_fog: bool = true
+var _boss_music_active: bool = false
 
 # -------------------------
 # INIT
@@ -292,11 +293,20 @@ func die():
 	await anim.animation_finished
 
 	if GameState.has_method("add_kill"):
-		GameState.add_kill("slime")
+		GameState.add_kill("slime", 1, _build_exp_stats())
 
+	_stop_boss_music()
 	_spawn_coin_drop()
 
 	queue_free()
+
+func _build_exp_stats() -> Dictionary:
+	return {
+		"max_health": max_health,
+		"attack": attack,
+		"defense": defense,
+		"speed": speed,
+	}
 
 func _spawn_coin_drop() -> void:
 
@@ -400,10 +410,19 @@ func _get_minimap_player_ref() -> Node2D:
 
 
 func _on_music_player_body_entered(body) -> void:
-	if body.is_in_group("player"):
+	if body.is_in_group("player") and not _boss_music_active:
+		_boss_music_active = true
 		MusicManager.push_music(music_atk)
 
 
 func _on_music_player_body_exited(body) -> void:
 	if body.is_in_group("player"):
-		MusicManager.pop_music()
+		_stop_boss_music()
+
+
+func _stop_boss_music() -> void:
+	if not _boss_music_active:
+		return
+
+	_boss_music_active = false
+	MusicManager.pop_music()

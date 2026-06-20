@@ -1,6 +1,8 @@
 extends Node
 
 signal state_loaded(success: bool)
+signal player_stats_increased(max_health_gain: int, attack_gain: int, defense_gain: int)
+signal experience_gained(amount: int)
 
 var _api_base_url: String = "http://127.0.0.1:8000"
 var _auth_token: String = ""
@@ -26,6 +28,13 @@ var inventory_counts: Dictionary = {}
 var assigned_action_item: String = ""
 var _locale_manager: Node = null
 var equipped_weapon: String = ""
+
+var player_level: int = 1
+var player_exp: int = 0
+var player_exp_to_next: int = 50
+var player_bonus_max_health: int = 0
+var player_bonus_attack: int = 0
+var player_bonus_defense: int = 0
 
 # -------------------------
 # SPAWN PONCTUEL (téléportations génériques hors donjon)
@@ -191,6 +200,7 @@ func _build_state_payload() -> Dictionary:
 		"inventory_counts": inventory_counts.duplicate(true),
 		"equipped_weapon": equipped_weapon,
 		"assigned_action_item": assigned_action_item,
+		"player_progression": _build_player_progression_payload(),
 		"quests": quests.duplicate(true),
 		"choice": choice,
 		# Étages — permet de reprendre une session en cours
@@ -215,6 +225,7 @@ func _apply_state_payload(state: Dictionary) -> void:
 	inventory_counts = _normalize_dict(state.get("inventory_counts", {}))
 	assigned_action_item = String(state.get("assigned_action_item", ""))
 	equipped_weapon = String(state.get("equipped_weapon", ""))
+	_apply_player_progression_payload(_normalize_dict(state.get("player_progression", {})))
 	quests = _normalize_dict(state.get("quests", quests))
 	choice = String(state.get("choice", choice))
 
@@ -275,6 +286,88 @@ func _queue_save_if_ready() -> void:
 	if _is_applying_state:
 		return
 	queue_save()
+
+func _build_player_progression_payload() -> Dictionary:
+	return {
+		"level": player_level,
+		"exp": player_exp,
+		"exp_to_next": player_exp_to_next,
+		"bonus_max_health": player_bonus_max_health,
+		"bonus_attack": player_bonus_attack,
+		"bonus_defense": player_bonus_defense,
+	}
+
+func _apply_player_progression_payload(value: Dictionary) -> void:
+	player_level = max(1, int(value.get("level", player_level)))
+	player_exp = max(0, int(value.get("exp", player_exp)))
+	player_exp_to_next = max(1, int(value.get("exp_to_next", _get_exp_required_for_level(player_level))))
+	player_bonus_max_health = max(0, int(value.get("bonus_max_health", player_bonus_max_health)))
+	player_bonus_attack = max(0, int(value.get("bonus_attack", player_bonus_attack)))
+	player_bonus_defense = max(0, int(value.get("bonus_defense", player_bonus_defense)))
+
+func _get_exp_required_for_level(level: int) -> int:
+	var safe_level: int = max(1, level)
+	return 50 + ((safe_level - 1) * 35)
+
+func calculate_monster_exp(enemy_stats: Dictionary) -> int:
+	var enemy_max_health: int = max(1, int(enemy_stats.get("max_health", 1)))
+	var enemy_attack: int = max(0, int(enemy_stats.get("attack", 0)))
+	var enemy_defense: int = max(0, int(enemy_stats.get("defense", 0)))
+	var enemy_speed: float = max(0.0, float(enemy_stats.get("speed", 0.0)))
+
+	var exp_value: int = int(round(
+		float(enemy_max_health) * 1.2
+		+ float(enemy_attack) * 4.0
+		+ float(enemy_defense) * 3.0
+		+ enemy_speed * 0.05
+	))
+
+	return max(1, exp_value)
+
+func add_experience(amount: int) -> void:
+	if amount <= 0:
+		return
+
+	player_exp += amount
+	emit_signal("experience_gained", amount)
+	var levels_gained := 0
+	var max_health_gain := 0
+	var attack_gain := 0
+	var defense_gain := 0
+
+	while player_exp >= player_exp_to_next:
+		player_exp -= player_exp_to_next
+		player_level += 1
+		levels_gained += 1
+
+		player_bonus_max_health += 5
+		max_health_gain += 5
+		player_bonus_attack += 2
+		attack_gain += 2
+		if player_level % 2 == 0:
+			player_bonus_defense += 1
+			defense_gain += 1
+
+		player_exp_to_next = _get_exp_required_for_level(player_level)
+
+	print("Experience +", amount, " | niveau ", player_level, " | XP ", player_exp, "/", player_exp_to_next)
+	if levels_gained > 0:
+		print("Niveau gagne x", levels_gained, " | bonus HP +", player_bonus_max_health, " ATK +", player_bonus_attack, " DEF +", player_bonus_defense)
+		emit_signal("player_stats_increased", max_health_gain, attack_gain, defense_gain)
+
+	_queue_save_if_ready()
+
+func get_player_max_health_bonus() -> int:
+	return player_bonus_max_health
+
+func get_player_attack_bonus() -> int:
+	return player_bonus_attack
+
+func get_player_defense_bonus() -> int:
+	return player_bonus_defense
+
+func get_player_progression_summary() -> Dictionary:
+	return _build_player_progression_payload()
 
 # =========================================================
 # NAVIGATION INTER-ÉTAGES
@@ -478,11 +571,14 @@ func start_quest(quest_id: String) -> bool:
 	_queue_save_if_ready()
 	return true
 
-func add_kill(enemy_type: String, amount: int = 1) -> void:
+func add_kill(enemy_type: String, amount: int = 1, enemy_stats: Dictionary = {}) -> void:
 	if enemy_type != "slime":
 		return
 
 	_add_kills_to_quest("slime_cleanup", amount)
+
+	if not enemy_stats.is_empty():
+		add_experience(calculate_monster_exp(enemy_stats) * max(1, amount))
 
 func is_quest_ready_to_turn_in(quest_id: String) -> bool:
 	if not has_quest(quest_id):

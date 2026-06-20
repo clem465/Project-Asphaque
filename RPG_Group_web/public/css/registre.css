@@ -1,6 +1,15 @@
 /* =========================
    VARIABLES & RESET
 ========================= */
+
+@font-face {
+    font-family: 'Jersey10';
+    src: url('../fonts/Jersey10-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --gold:       #C9A22F;
     --gold-light: #f0c040;
@@ -17,13 +26,17 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+*, button, input, textarea, select {
+    font-family: 'Jersey10', sans-serif;
+}
+
 body {
     min-height: 100vh;
     background-color: var(--bg-deep);
     background-image:
         radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201,162,47,0.10) 0%, transparent 70%),
         url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A22F' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    font-family: 'Cinzel', serif;
+    font-family: 'Jersey10', sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -122,7 +135,7 @@ body {
 }
 
 .register-logo h1 {
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Jersey10', sans-serif;
     font-size: 17px;
     color: var(--gold);
     text-shadow: 0 0 20px rgba(201,162,47,0.5), 2px 2px 0 rgba(0,0,0,0.8);
@@ -131,7 +144,7 @@ body {
 }
 
 .register-logo .tagline {
-    font-family: 'Cinzel', serif;
+    font-family: 'Jersey10', sans-serif;
     font-size: 11px;
     color: var(--text-muted);
     letter-spacing: 3px;
@@ -165,7 +178,7 @@ body {
     border-radius: 4px;
     padding: 12px 16px;
     margin-bottom: 20px;
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Jersey10', sans-serif;
     font-size: 9px;
     line-height: 1.7;
     text-align: center;
@@ -207,7 +220,7 @@ body {
 
 .form-group label {
     display: block;
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Jersey10', sans-serif;
     font-size: 8px;
     color: var(--gold);
     letter-spacing: 1px;
@@ -239,7 +252,7 @@ body {
     border: 1px solid rgba(201,162,47,0.2);
     border-radius: 3px;
     color: var(--text);
-    font-family: 'Cinzel', serif;
+    font-family: 'Jersey10', sans-serif;
     font-size: 13px;
     padding: 12px 44px 12px 42px;
     outline: none;
@@ -288,7 +301,7 @@ body {
 .field-error .form-error {
     list-style: none;
     padding: 0;
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Jersey10', sans-serif;
     font-size: 8px;
     color: #e74c3c;
     line-height: 1.6;
@@ -338,7 +351,7 @@ body {
 }
 
 .strength-label {
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Jersey10', sans-serif;
     font-size: 7px;
     white-space: nowrap;
     transition: color 0.4s ease;
@@ -417,7 +430,7 @@ body {
     border: none;
     border-radius: 3px;
     color: #1a1000;
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Jersey10', sans-serif;
     font-size: 12px;
     letter-spacing: 1px;
     cursor: pointer;

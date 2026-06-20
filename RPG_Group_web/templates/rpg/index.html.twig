@@ -12,7 +12,7 @@
 
 <div class="rpg-wrapper">
 
-    <!-- 🌐 SÉLECTEUR DE LANGUE + LOGIN — coin haut droit -->
+    <!-- 🌐 SÉLECTEUR DE LANGUE — coin haut droit -->
     <div class="lang-switcher">
         <div class="lang-dropdown" id="langDropdown">
 
@@ -32,29 +32,18 @@
             </ul>
 
         </div>
-
-        <!-- ✅ Bouton login directement sous le dropdown -->
-        <div class="login-button">
-            {% if app.user %}
-                <a href="{{ path('app_logout') }}" class="btn btn-danger" data-i18n="logout">
-                    🚪 Logout
-                </a>
-            {% else %}
-                <a href="{{ path('app_login') }}" class="btn btn-primary" data-i18n="login">
-                    ⚔ Login
-                </a>
-            {% endif %}
-        </div>
-
     </div>
 
     <header class="rpg-header">
-        <h1>⚔ TOWER OF DESTINY ⚔</h1>
-        <p class="subtitle" data-i18n="subtitle">Grimpez la tour. Affrontez votre destin.</p>
+        <h1>Asphaque</h1>
+        <p class="subtitle" data-i18n="subtitle">Descendez dans les profondeurs.</p>
     </header>
 
     <main class="rpg-main">
         <section class="game-container">
+            <button type="button" id="fullscreen-btn" class="game-tool-btn" aria-label="Plein écran" title="Plein écran">
+                <i class="fas fa-expand"></i>
+            </button>
             <iframe id="game-frame" src="{{ asset('game/index.html') }}" tabindex="0" allow="autoplay; fullscreen *; gamepad *"></iframe>
         </section>
     </main>
@@ -64,22 +53,23 @@
         <section class="controls">
             <h2 data-i18n="controls-title">🎮 Contrôles</h2>
             <ul>
-                <li><strong data-i18n="ctrl-move-key">ZQSD / Flèches</strong> – <span data-i18n="ctrl-move">Déplacement</span></li>
+                <li><strong data-i18n="ctrl-move-key">Z Q S D / Flèches</strong> – <span data-i18n="ctrl-move">Déplacement</span></li>
                 <li><strong data-i18n="ctrl-attack-key">Espace</strong> – <span data-i18n="ctrl-attack">Attaque</span></li>
-                <li><strong>I</strong> – <span data-i18n="ctrl-inventory">Inventaire</span></li>
-                <li><strong>Esc</strong> – <span data-i18n="ctrl-pause">Pause</span></li>
+                <li><strong data-i18n="ctrl-interact-key">E</strong> – <span data-i18n="ctrl-interact">Interaction</span></li>
+                <li><strong data-i18n="ctrl-r-key">R</strong> – <span data-i18n="ctrl-r">Raccourcis</span></li>
             </ul>
         </section>
 
         <section class="A-propos">
             <h2 data-i18n="about-title">📖 À propos du jeu</h2>
             <p data-i18n="about-p1">
-                Plongez dans l'univers de <strong>Tower of Destiny</strong>, un RPG où vous devez gravir
-                une tour remplie de monstres, de pièges et de mystères.
+                Plongez dans un monde mystérieux où chaque étage de la tour
+                recèle des secrets et des dangers. Explorez, combattez et découvrez
+                l'histoire qui se cache derrière cette tour énigmatique.
             </p>
             <p data-i18n="about-p2">
                 Chaque étage devient plus dangereux. Seuls les héros les plus courageux
-                atteindront le sommet et découvriront la vérité qui s'y cache.
+                atteindront les profondeurs de la tour et découvriront ses véritables secrets.
             </p>
         </section>
 

@@ -76,6 +76,36 @@ http://127.0.0.1:8080/?api=http://127.0.0.1:8000
 
 The game is displayed on the homepage (`/`) inside the dedicated iframe.
 
+## Godot gameplay notes
+
+Current Godot controls include:
+
+- `M`: open/close map
+- `I`: open/close inventory
+- `C`: open/close stats
+- `V`: open/close actions
+- `P`: open/close settings
+- `R`: use the assigned action item
+
+On Android/iOS or mobile browsers, Godot shows touch controls only on mobile:
+
+- left joystick for movement
+- right-side buttons for attack, assigned item, and interaction
+
+The game also includes:
+
+- XP gain when monsters die, with floating XP text on screen
+- player level/stat progression saved through the Python API state payload
+- in-game settings for master and music volume, saved locally in `user://settings.cfg`
+
+After changing anything inside `GODOT/`, export the Godot project to Web again
+and publish it into Symfony:
+
+```powershell
+cd .\RPG_Group_web
+.\scripts\publish-godot-web.cmd
+```
+
 ## If you do not export Godot yet
 
 A placeholder page is shown in the iframe at `RPG_Group_web/public/game/index.html`.

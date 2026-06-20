@@ -62,7 +62,7 @@ var _stairs_down_pos := Vector2i.ZERO
 
 
 func _ready():
-	MusicManager.push_music(dungeon_music)
+	MusicManager.play_music(dungeon_music)
 	noise.seed = GameState.get_floor_seed(GameState.current_floor)
 	noise.frequency = 0.08
 	entity_rng.seed = noise.seed + 99991

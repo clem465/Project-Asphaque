@@ -12,6 +12,7 @@ extends Control
 @onready var login_button: Button = $VBoxContainer/TopCenter/HBoxContainer/login_button
 @onready var register_button: Button = $VBoxContainer/TopCenter/HBoxContainer/register_button
 @onready var submit_button: Button = $VBoxContainer/SubmitCenter/submit_button
+@onready var loader: TextureRect = $loader
 
 const DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
 const ACTIVE_BUTTON_COLOR: Color = Color(0.4, 0.7, 0.95, 1)
@@ -27,6 +28,10 @@ var _locale_manager: Node = null
 
 
 func _ready():
+	_center_login_layout()
+	if not get_viewport().size_changed.is_connected(_center_login_layout):
+		get_viewport().size_changed.connect(_center_login_layout)
+
 	api_base_url = _resolve_api_base_url()
 	api_login = "%s/login" % api_base_url
 	api_register = "%s/register" % api_base_url
@@ -53,6 +58,43 @@ func _ready():
 		register_button.toggle_mode = true
 
 	_update_form_ui()
+
+func _center_login_layout() -> void:
+	var viewport_size: Vector2 = get_viewport_rect().size
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	offset_left = 0.0
+	offset_top = 0.0
+	offset_right = 0.0
+	offset_bottom = 0.0
+	size = viewport_size
+
+	var background_panel := get_node_or_null("Panel") as Panel
+	if background_panel:
+		background_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+		background_panel.offset_left = 0.0
+		background_panel.offset_top = 0.0
+		background_panel.offset_right = 0.0
+		background_panel.offset_bottom = 0.0
+
+	var content_width: float = min(560.0, viewport_size.x * 0.88)
+	var title_height: float = min(150.0, viewport_size.y * 0.24)
+	var form_height: float = min(400.0, viewport_size.y * 0.58)
+	var gap: float = 14.0
+	var total_height: float = title_height + gap + form_height
+	var left: float = (viewport_size.x - content_width) * 0.5
+	var top: float = max(24.0, (viewport_size.y - total_height) * 0.5)
+
+	if title_label:
+		title_label.position = Vector2(left, top)
+		title_label.size = Vector2(content_width, title_height)
+
+	var form := get_node_or_null("VBoxContainer") as VBoxContainer
+	if form:
+		form.position = Vector2(left, top + title_height + gap)
+		form.size = Vector2(content_width, form_height)
+
+	if loader:
+		loader.position = (viewport_size - loader.size) * 0.5
 
 func _on_locale_changed(_locale: String) -> void:
 	_apply_locale()

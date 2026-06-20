@@ -44,6 +44,8 @@ extends CanvasLayer
 @onready var action3_button: Button = $ActionsWindow/Content/ActionsVBox/Action3
 @onready var lang_toggle_button: Button = $LangToggleButton
 
+const SETTINGS_CONFIG_PATH := "user://settings.cfg"
+
 var _locale_manager: Node = null
 
 var _map_bounds: Rect2 = Rect2()
@@ -62,9 +64,27 @@ var _is_syncing_item_slot_toggle: bool = false
 var _action_item_id: String = "healing_potion"
 var _last_inventory_signature: String = ""
 var _fog_retry_frames: int = 0
+var _mobile_controls: Control = null
+var _mobile_joystick_base: Control = null
+var _mobile_joystick_knob: ColorRect = null
+var _mobile_joystick_dragging: bool = false
+var _mobile_joystick_radius: float = 58.0
+var _settings_button: Button = null
+var _settings_window: Panel = null
+var _settings_title_label: Label = null
+var _settings_master_label: Label = null
+var _settings_music_label: Label = null
+var _settings_master_value_label: Label = null
+var _settings_music_value_label: Label = null
+var _settings_master_slider: HSlider = null
+var _settings_music_slider: HSlider = null
+var _settings_master_volume: float = 100.0
+var _settings_music_volume: float = 100.0
+var _is_loading_settings: bool = false
 
 func _ready() -> void:
 	_disable_button_keyboard_focus(self)
+	_build_settings_ui()
 	_locale_manager = get_node_or_null("/root/LocaleManager")
 	_apply_locale()
 	if _locale_manager and _locale_manager.has_signal("locale_changed"):
@@ -142,6 +162,29 @@ func _ready() -> void:
 	call_deferred("_center_map")
 	call_deferred("_sync_attack_toggle_from_player")
 	call_deferred("_sync_item_slot_toggle_from_state")
+	call_deferred("_setup_mobile_controls")
+	_load_audio_settings()
+	_apply_audio_settings()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.echo:
+		return
+
+	if Input.is_action_just_pressed("toggle_map_window"):
+		_on_toggle_pressed()
+		get_viewport().set_input_as_handled()
+	elif Input.is_action_just_pressed("toggle_inventory_window"):
+		_on_inventory_pressed()
+		get_viewport().set_input_as_handled()
+	elif Input.is_action_just_pressed("toggle_stats_window"):
+		_on_stats_pressed()
+		get_viewport().set_input_as_handled()
+	elif Input.is_action_just_pressed("toggle_actions_window"):
+		_on_actions_pressed()
+		get_viewport().set_input_as_handled()
+	elif Input.is_action_just_pressed("toggle_settings_window"):
+		_on_settings_pressed()
+		get_viewport().set_input_as_handled()
 
 func _on_locale_changed(_locale: String) -> void:
 	_apply_locale()
@@ -179,7 +222,192 @@ func _apply_locale() -> void:
 	if action3_button:
 		action3_button.text = _locale_manager.tr_key("ui.action_3")
 
+	_update_settings_locale()
 	_update_lang_toggle_label()
+
+func _build_settings_ui() -> void:
+	if _settings_button != null:
+		return
+
+	_settings_button = Button.new()
+	_settings_button.name = "SettingsButton"
+	_settings_button.text = "Parametres"
+	_settings_button.focus_mode = Control.FOCUS_NONE
+	_settings_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_settings_button.anchor_left = 1.0
+	_settings_button.anchor_top = 1.0
+	_settings_button.anchor_right = 1.0
+	_settings_button.anchor_bottom = 1.0
+	_settings_button.offset_left = -700.0
+	_settings_button.offset_top = -70.0
+	_settings_button.offset_right = -580.0
+	_settings_button.offset_bottom = -20.0
+	_settings_button.pressed.connect(_on_settings_pressed)
+	add_child(_settings_button)
+
+	_settings_window = Panel.new()
+	_settings_window.name = "SettingsWindow"
+	_settings_window.visible = false
+	_settings_window.offset_left = 360.0
+	_settings_window.offset_top = 150.0
+	_settings_window.offset_right = 720.0
+	_settings_window.offset_bottom = 360.0
+	add_child(_settings_window)
+
+	var title_bar := ColorRect.new()
+	title_bar.name = "TitleBar"
+	title_bar.color = Color(0.08, 0.08, 0.13, 0.95)
+	title_bar.anchor_right = 1.0
+	title_bar.offset_bottom = 30.0
+	_settings_window.add_child(title_bar)
+
+	var header := HBoxContainer.new()
+	header.name = "Header"
+	header.anchor_right = 1.0
+	header.anchor_bottom = 1.0
+	header.offset_left = 8.0
+	header.offset_right = -8.0
+	title_bar.add_child(header)
+
+	_settings_title_label = Label.new()
+	_settings_title_label.text = "Parametres"
+	_settings_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(_settings_title_label)
+
+	var close_button := Button.new()
+	close_button.text = "X"
+	close_button.custom_minimum_size = Vector2(34, 24)
+	close_button.focus_mode = Control.FOCUS_NONE
+	close_button.pressed.connect(_on_settings_pressed)
+	header.add_child(close_button)
+
+	var content := VBoxContainer.new()
+	content.name = "Content"
+	content.anchor_right = 1.0
+	content.anchor_bottom = 1.0
+	content.offset_left = 16.0
+	content.offset_top = 48.0
+	content.offset_right = -16.0
+	content.offset_bottom = -16.0
+	content.add_theme_constant_override("separation", 16)
+	_settings_window.add_child(content)
+
+	var master_row := _create_settings_slider_row("Volume general", _settings_master_volume)
+	content.add_child(master_row)
+	_settings_master_label = master_row.get_node("NameLabel") as Label
+	_settings_master_slider = master_row.get_node("Slider") as HSlider
+	_settings_master_value_label = master_row.get_node("ValueLabel") as Label
+	_settings_master_slider.value_changed.connect(_on_master_volume_changed)
+
+	var music_row := _create_settings_slider_row("Musique", _settings_music_volume)
+	content.add_child(music_row)
+	_settings_music_label = music_row.get_node("NameLabel") as Label
+	_settings_music_slider = music_row.get_node("Slider") as HSlider
+	_settings_music_value_label = music_row.get_node("ValueLabel") as Label
+	_settings_music_slider.value_changed.connect(_on_music_volume_changed)
+
+	_update_settings_locale()
+
+func _create_settings_slider_row(label_text: String, value: float) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.name = label_text.replace(" ", "") + "Row"
+	row.add_theme_constant_override("separation", 10)
+
+	var name_label := Label.new()
+	name_label.name = "NameLabel"
+	name_label.text = label_text
+	name_label.custom_minimum_size = Vector2(120, 0)
+	row.add_child(name_label)
+
+	var slider := HSlider.new()
+	slider.name = "Slider"
+	slider.min_value = 0.0
+	slider.max_value = 100.0
+	slider.step = 1.0
+	slider.value = value
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(slider)
+
+	var value_label := Label.new()
+	value_label.name = "ValueLabel"
+	value_label.text = "%d%%" % int(value)
+	value_label.custom_minimum_size = Vector2(46, 0)
+	row.add_child(value_label)
+
+	return row
+
+func _update_settings_locale() -> void:
+	if _settings_button == null:
+		return
+
+	var title := "Parametres"
+	var master := "Volume general"
+	var music := "Musique"
+
+	if _locale_manager and _locale_manager.has_method("tr_key"):
+		title = _locale_manager.tr_key("ui.settings")
+		master = _locale_manager.tr_key("ui.volume_master")
+		music = _locale_manager.tr_key("ui.volume_music")
+
+	_settings_button.text = title
+	if _settings_title_label:
+		_settings_title_label.text = title
+	if _settings_master_label:
+		_settings_master_label.text = master
+	if _settings_music_label:
+		_settings_music_label.text = music
+
+func _on_settings_pressed() -> void:
+	if _settings_window:
+		_settings_window.visible = not _settings_window.visible
+
+func _on_master_volume_changed(value: float) -> void:
+	_settings_master_volume = value
+	if _settings_master_value_label:
+		_settings_master_value_label.text = "%d%%" % int(value)
+	_apply_audio_settings()
+	_save_audio_settings()
+
+func _on_music_volume_changed(value: float) -> void:
+	_settings_music_volume = value
+	if _settings_music_value_label:
+		_settings_music_value_label.text = "%d%%" % int(value)
+	_apply_audio_settings()
+	_save_audio_settings()
+
+func _load_audio_settings() -> void:
+	_is_loading_settings = true
+	var config := ConfigFile.new()
+	if config.load(SETTINGS_CONFIG_PATH) == OK:
+		_settings_master_volume = float(config.get_value("audio", "master_volume", _settings_master_volume))
+		_settings_music_volume = float(config.get_value("audio", "music_volume", _settings_music_volume))
+
+	if _settings_master_slider:
+		_settings_master_slider.set_value_no_signal(_settings_master_volume)
+	if _settings_music_slider:
+		_settings_music_slider.set_value_no_signal(_settings_music_volume)
+	if _settings_master_value_label:
+		_settings_master_value_label.text = "%d%%" % int(_settings_master_volume)
+	if _settings_music_value_label:
+		_settings_music_value_label.text = "%d%%" % int(_settings_music_volume)
+	_is_loading_settings = false
+
+func _save_audio_settings() -> void:
+	if _is_loading_settings:
+		return
+
+	var config := ConfigFile.new()
+	config.set_value("audio", "master_volume", _settings_master_volume)
+	config.set_value("audio", "music_volume", _settings_music_volume)
+	config.save(SETTINGS_CONFIG_PATH)
+
+func _apply_audio_settings() -> void:
+	var master_normalized: float = clamp(_settings_master_volume / 100.0, 0.0, 1.0)
+	var master_db: float = linear_to_db(master_normalized) if master_normalized > 0.0 else -80.0
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), master_db)
+
+	if MusicManager and MusicManager.has_method("set_music_volume_percent"):
+		MusicManager.set_music_volume_percent(_settings_music_volume)
 
 func _on_lang_toggle_pressed() -> void:
 	if not _locale_manager:
@@ -206,6 +434,160 @@ func _disable_button_keyboard_focus(node: Node) -> void:
 
 	for child in node.get_children():
 		_disable_button_keyboard_focus(child)
+
+func _setup_mobile_controls() -> void:
+	if not _should_show_mobile_controls():
+		_release_mobile_move_actions()
+		return
+
+	if _mobile_controls != null:
+		return
+
+	_mobile_controls = Control.new()
+	_mobile_controls.name = "MobileControls"
+	_mobile_controls.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_mobile_controls.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_mobile_controls.z_index = 200
+	add_child(_mobile_controls)
+
+	_create_mobile_joystick()
+
+	var right_pad := VBoxContainer.new()
+	right_pad.anchor_left = 1.0
+	right_pad.anchor_top = 1.0
+	right_pad.anchor_right = 1.0
+	right_pad.anchor_bottom = 1.0
+	right_pad.offset_left = -178
+	right_pad.offset_top = -222
+	right_pad.offset_right = -18
+	right_pad.offset_bottom = -18
+	right_pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_mobile_controls.add_child(right_pad)
+
+	_add_mobile_action_button(right_pad, "Atk", "attack")
+	_add_mobile_action_button(right_pad, "Use", "use_assigned_item")
+	_add_mobile_action_button(right_pad, "Talk", "interact")
+
+func _should_show_mobile_controls() -> bool:
+	if OS.has_feature("android") or OS.has_feature("ios") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
+		return true
+
+	if OS.has_feature("web") and ClassDB.class_exists("JavaScriptBridge"):
+		var user_agent = JavaScriptBridge.eval("navigator.userAgent || ''", true)
+		var ua := String(user_agent).to_lower()
+		return ua.contains("android") or ua.contains("iphone") or ua.contains("ipad") or ua.contains("ipod") or ua.contains("mobile")
+
+	return false
+
+func _create_mobile_joystick() -> void:
+	_mobile_joystick_base = Control.new()
+	_mobile_joystick_base.name = "MoveJoystick"
+	_mobile_joystick_base.anchor_left = 0.0
+	_mobile_joystick_base.anchor_top = 1.0
+	_mobile_joystick_base.anchor_right = 0.0
+	_mobile_joystick_base.anchor_bottom = 1.0
+	_mobile_joystick_base.offset_left = 24.0
+	_mobile_joystick_base.offset_top = -168.0
+	_mobile_joystick_base.offset_right = 144.0
+	_mobile_joystick_base.offset_bottom = -48.0
+	_mobile_joystick_base.mouse_filter = Control.MOUSE_FILTER_STOP
+	_mobile_joystick_base.gui_input.connect(_on_mobile_joystick_input)
+	_mobile_controls.add_child(_mobile_joystick_base)
+
+	var base_visual := ColorRect.new()
+	base_visual.name = "Base"
+	base_visual.color = Color(0.05, 0.05, 0.08, 0.38)
+	base_visual.set_anchors_preset(Control.PRESET_FULL_RECT)
+	base_visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_mobile_joystick_base.add_child(base_visual)
+
+	_mobile_joystick_knob = ColorRect.new()
+	_mobile_joystick_knob.name = "Knob"
+	_mobile_joystick_knob.color = Color(1.0, 0.86, 0.28, 0.75)
+	_mobile_joystick_knob.custom_minimum_size = Vector2(46, 46)
+	_mobile_joystick_knob.size = Vector2(46, 46)
+	_mobile_joystick_knob.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_mobile_joystick_base.add_child(_mobile_joystick_knob)
+	_reset_mobile_joystick()
+
+func _on_mobile_joystick_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		_mobile_joystick_dragging = event.pressed
+		if event.pressed:
+			_update_mobile_joystick(event.position)
+		else:
+			_reset_mobile_joystick()
+		_mobile_joystick_base.accept_event()
+	elif event is InputEventScreenDrag:
+		_update_mobile_joystick(event.position)
+		_mobile_joystick_base.accept_event()
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		_mobile_joystick_dragging = event.pressed
+		if event.pressed:
+			_update_mobile_joystick(event.position)
+		else:
+			_reset_mobile_joystick()
+		_mobile_joystick_base.accept_event()
+	elif event is InputEventMouseMotion and _mobile_joystick_dragging:
+		_update_mobile_joystick(event.position)
+		_mobile_joystick_base.accept_event()
+
+func _update_mobile_joystick(local_position: Vector2) -> void:
+	if _mobile_joystick_base == null:
+		return
+
+	var center: Vector2 = _mobile_joystick_base.size * 0.5
+	var offset: Vector2 = local_position - center
+	if offset.length() > _mobile_joystick_radius:
+		offset = offset.normalized() * _mobile_joystick_radius
+
+	if _mobile_joystick_knob:
+		_mobile_joystick_knob.position = center + offset - (_mobile_joystick_knob.size * 0.5)
+
+	var direction := offset / _mobile_joystick_radius
+	_apply_mobile_move_vector(direction)
+
+func _reset_mobile_joystick() -> void:
+	if _mobile_joystick_base and _mobile_joystick_knob:
+		_mobile_joystick_knob.position = (_mobile_joystick_base.size - _mobile_joystick_knob.size) * 0.5
+	_release_mobile_move_actions()
+
+func _apply_mobile_move_vector(direction: Vector2) -> void:
+	var dead_zone := 0.25
+	_set_mobile_action_state("move_left", direction.x < -dead_zone)
+	_set_mobile_action_state("move_right", direction.x > dead_zone)
+	_set_mobile_action_state("move_up", direction.y < -dead_zone)
+	_set_mobile_action_state("move_down", direction.y > dead_zone)
+
+func _set_mobile_action_state(action_name: String, pressed: bool) -> void:
+	if pressed:
+		Input.action_press(action_name)
+	else:
+		Input.action_release(action_name)
+
+func _release_mobile_move_actions() -> void:
+	Input.action_release("move_left")
+	Input.action_release("move_right")
+	Input.action_release("move_up")
+	Input.action_release("move_down")
+
+func _add_mobile_action_button(parent: Control, label: String, action_name: String) -> Button:
+	var button := Button.new()
+	button.text = label
+	button.custom_minimum_size = Vector2(52, 52)
+	button.focus_mode = Control.FOCUS_NONE
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.modulate = Color(1, 1, 1, 0.82)
+	button.button_down.connect(_on_mobile_action_down.bind(action_name))
+	button.button_up.connect(_on_mobile_action_up.bind(action_name))
+	parent.add_child(button)
+	return button
+
+func _on_mobile_action_down(action_name: String) -> void:
+	Input.action_press(action_name)
+
+func _on_mobile_action_up(action_name: String) -> void:
+	Input.action_release(action_name)
 
 func _process(_delta: float) -> void:
 	_update_player_panels()
@@ -596,6 +978,11 @@ func _update_player_panels() -> void:
 			]
 		else:
 			weapon_label.text = "Weapon: %s" % weapon_name
+
+		var player_level: int = _read_player_int(player, "get_level_value", "player_level", GameState.player_level)
+		var player_exp: int = _read_player_int(player, "get_experience_value", "player_exp", GameState.player_exp)
+		var player_exp_to_next: int = max(1, _read_player_int(player, "get_experience_to_next_value", "player_exp_to_next", GameState.player_exp_to_next))
+		weapon_label.text += "\nLVL: %d | XP: %d / %d" % [player_level, player_exp, player_exp_to_next]
 
 	_sync_attack_toggle_from_player()
 

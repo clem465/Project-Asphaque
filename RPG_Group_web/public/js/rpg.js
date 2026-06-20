@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const container = document.querySelector('.game-container');
     const frame = document.getElementById('game-frame');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
     if (!container || !frame) return;
 
     // ── État : le jeu a-t-il reçu un vrai clic ? ──
@@ -55,6 +56,52 @@ document.addEventListener('DOMContentLoaded', () => {
             focusGame();
         }
     });
+
+    function isGameFullscreen() {
+        return document.fullscreenElement === container;
+    }
+
+    function updateFullscreenButton() {
+        if (!fullscreenBtn) return;
+
+        const icon = fullscreenBtn.querySelector('i');
+        const label = isGameFullscreen() ? 'Quitter le plein écran' : 'Plein écran';
+
+        fullscreenBtn.setAttribute('aria-label', label);
+        fullscreenBtn.setAttribute('title', label);
+
+        if (icon) {
+            icon.classList.toggle('fa-expand', !isGameFullscreen());
+            icon.classList.toggle('fa-compress', isGameFullscreen());
+        }
+    }
+
+    fullscreenBtn?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        try {
+            if (isGameFullscreen()) {
+                await document.exitFullscreen();
+            } else {
+                await container.requestFullscreen();
+                focusGame();
+            }
+        } catch (_) {
+            // Some browsers reject fullscreen when the page is not user-activated.
+        }
+
+        updateFullscreenButton();
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        updateFullscreenButton();
+        if (isGameFullscreen()) {
+            requestAnimationFrame(focusGame);
+        }
+    });
+
+    updateFullscreenButton();
 
     let pendingGameLang = null;
 
@@ -111,59 +158,59 @@ document.addEventListener('DOMContentLoaded', () => {
     const translations = {
 
         fr: {
-            subtitle: 'Grimpez la tour. Affrontez votre destin.',
+            subtitle: 'Descendez dans les profondeurs.',
             'controls-title': '🎮 Contrôles',
-            'ctrl-move-key': 'ZQSD / Flèches',
+            'ctrl-move-key': 'Z Q S D / Flèches',
             'ctrl-move': 'Déplacement',
             'ctrl-attack-key': 'Espace',
             'ctrl-attack': 'Attaque',
-            'ctrl-inventory': 'Inventaire',
-            'ctrl-pause': 'Pause',
+            'ctrl-interact': 'Interaction',
+            'ctrl-r': 'Raccourcis',
             'about-title': '📖 À propos du jeu',
-            'about-p1': 'Plongez dans l\'univers de <strong>Tower of Destiny</strong>, un RPG où vous devez gravir une tour remplie de monstres, de pièges et de mystères.',
-            'about-p2': 'Chaque étage devient plus dangereux. Seuls les héros les plus courageux atteindront le sommet et découvriront la vérité qui s\'y cache.',
+            'about-p1': 'Plongez dans un monde mystérieux où chaque étage de la tour recèle des secrets et des dangers. Explorez, combattez et découvrez l\'histoire qui se cache derrière cette tour énigmatique.',
+            'about-p2': 'Chaque étage devient plus dangereux. Seuls les héros les plus courageux atteindront les profondeurs de la tour et découvriront ses véritables secrets.',
         },
 
         en: {
-            subtitle: 'Climb the tower. Face your destiny.',
+            subtitle: 'Descend into the depths.',
             'controls-title': '🎮 Controls',
-            'ctrl-move-key': 'WASD / Arrows',
+            'ctrl-move-key': 'W A S D / Arrows',
             'ctrl-move': 'Movement',
             'ctrl-attack-key': 'Space',
             'ctrl-attack': 'Attack',
-            'ctrl-inventory': 'Inventory',
-            'ctrl-pause': 'Pause',
+            'ctrl-interact': 'Interaction',
+            'ctrl-r': 'Shortcuts',
             'about-title': '📖 About the game',
-            'about-p1': 'Dive into the world of <strong>Tower of Destiny</strong>, an RPG where you must climb a tower filled with monsters, traps, and mysteries.',
-            'about-p2': 'Each floor grows more dangerous. Only the bravest heroes will reach the summit and uncover the truth hidden within.',
+            'about-p1': 'Dive into the world of <strong>Tower of Destiny</strong>, an RPG where you must descend into the depths of a mysterious tower filled with monsters, traps, and mysteries.',
+            'about-p2': 'Each floor grows more dangerous. Only the bravest heroes will reach the depths and uncover the truth hidden within.',
         },
 
         es: {
-            subtitle: 'Sube la torre. Enfrenta tu destino.',
+            subtitle: 'Desciende a las profundidades.',
             'controls-title': '🎮 Controles',
-            'ctrl-move-key': 'WASD / Flechas',
+            'ctrl-move-key': 'W A S D / Flechas',
             'ctrl-move': 'Movimiento',
             'ctrl-attack-key': 'Espacio',
             'ctrl-attack': 'Ataque',
-            'ctrl-inventory': 'Inventario',
-            'ctrl-pause': 'Pausa',
+            'ctrl-interact': 'Interacción',
+            'ctrl-r': 'Atajos',
             'about-title': '📖 Sobre el juego',
-            'about-p1': 'Sumérgete en el universo de <strong>Tower of Destiny</strong>, un RPG donde debes escalar una torre llena de monstruos, trampas y misterios.',
-            'about-p2': 'Cada piso se vuelve más peligroso. Solo los héroes más valientes llegarán a la cima y descubrirán la verdad que se esconde allí.',
+            'about-p1': 'Sumérgete en el mundo de <strong>Tower of Destiny</strong>, un RPG donde debes subir a la cima de una torre llena de monstruos, trampas y misterios.',
+            'about-p2': 'Cada piso se vuelve más peligroso. Solo los héroes más valientes llegarán a la cima y descubrirán la verdad oculta.',
         },
 
         ja: {
-            subtitle: 'タワーを登れ。運命と向き合え。',
+            subtitle: '深淵へと降り立て。',
             'controls-title': '🎮 操作方法',
-            'ctrl-move-key': 'WASD / 矢印キー',
+            'ctrl-move-key': 'W A S D / 矢印キー',
             'ctrl-move': '移動',
             'ctrl-attack-key': 'スペース',
             'ctrl-attack': '攻撃',
-            'ctrl-inventory': 'インベントリ',
-            'ctrl-pause': 'ポーズ',
+            'ctrl-interact': 'インタラクト',
+            'ctrl-r': 'ショートカット',
             'about-title': '📖 ゲームについて',
-            'about-p1': '<strong>Tower of Destiny</strong>の世界へ。モンスター、罠、謎に満ちた塔を登るRPGです。',
-            'about-p2': '階を上るごとに危険が増す。最も勇敢な英雄だけが頂上に辿り着き、隠された真実を明かすことができる。',
+            'about-p1': '<strong>タワー・オブ・デスティニー</strong>の世界に飛び込み、モンスター、罠、謎に満ちた塔の深部を探索するRPGです。',
+            'about-p2': '各階層はより危険になります。最も勇敢な英雄だけが塔の深部に到達し、隠された真実を発見するでしょう。',
         },
 
     };

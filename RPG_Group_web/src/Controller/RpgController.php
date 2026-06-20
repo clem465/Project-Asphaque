@@ -6,7 +6,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use App\Form\RegistrationFormType;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,15 +31,6 @@ class RpgController extends AbstractController
 
         return $this->render('rpg/index.html.twig', [
             'character' => $character,
-        ]);
-    }
-
-    #[Route('/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
-    {
-        return $this->render('login/login.html.twig', [
-            'last_username' => $authenticationUtils->getLastUsername(),
-            'error' => $authenticationUtils->getLastAuthenticationError(),
         ]);
     }
 
@@ -94,7 +84,7 @@ class RpgController extends AbstractController
 
             $this->addFlash('success', 'A reset link has been sent to your email.');
 
-            return $this->redirectToRoute('app_login');
+            return $this->redirectToRoute('app_rpg');
         }
 
         return $this->render('reset_password/forgot_password.html.twig', [
@@ -132,7 +122,7 @@ class RpgController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_login');
+            return $this->redirectToRoute('app_rpg');
         }
 
         return $this->render('registre/registre.html.twig', [

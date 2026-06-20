@@ -286,11 +286,19 @@ func die():
 	await anim.animation_finished
 
 	if GameState.has_method("add_kill"):
-		GameState.add_kill("slime")
+		GameState.add_kill("slime", 1, _build_exp_stats())
 
 	_spawn_coin_drop()
 
 	queue_free()
+
+func _build_exp_stats() -> Dictionary:
+	return {
+		"max_health": max_health,
+		"attack": attack,
+		"defense": defense,
+		"speed": speed,
+	}
 
 func _spawn_coin_drop() -> void:
 

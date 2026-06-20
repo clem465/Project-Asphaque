@@ -171,6 +171,19 @@ Optional custom source folder:
 .\scripts\publish-godot-web.cmd -SourcePath "C:\path\to\godot-web-build"
 ```
 
+## Godot UI and mobile controls
+
+The source Godot project now includes:
+
+- keyboard shortcuts: `M` map, `I` inventory, `C` stats, `V` actions, `P` settings
+- mobile-only touch controls with a left joystick and right-side action buttons
+- XP floating text when monsters grant experience
+- saved player progression in the Python `/state` payload
+- in-game audio settings for master volume and music volume
+
+These changes live in `GODOT/`. They are visible in Symfony only after a fresh
+Godot Web export and another publish step into `public/game`.
+
 ## What is still missing for full plug-and-play
 
 Current status: close to plug-and-play, but not yet true one-command setup.
