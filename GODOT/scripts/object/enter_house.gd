@@ -23,10 +23,13 @@ func teleport_to_house() -> void:
 	GameState.house_return_spawn_once = true
 	GameState.next_spawn_position = spawn_position
 	GameState.next_spawn_once = true
-	get_tree().change_scene_to_file(target_scene)
+	call_deferred("_change_scene")
 
 
 func _get_return_spawn_position() -> Vector2:
 	if return_spawn_position != Vector2.ZERO:
 		return return_spawn_position
 	return global_position + return_spawn_offset
+
+func _change_scene() -> void:
+	get_tree().change_scene_to_file(target_scene)

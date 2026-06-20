@@ -29,4 +29,7 @@ func teleport_to_village() -> void:
 	print("exit_house: saving spawn_position:", return_position)
 	GameState.next_spawn_position = return_position
 	GameState.next_spawn_once = true
+	call_deferred("_change_scene")
+
+func _change_scene() -> void:
 	get_tree().change_scene_to_file(target_scene)
