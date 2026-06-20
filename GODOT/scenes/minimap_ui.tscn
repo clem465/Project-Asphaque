@@ -155,6 +155,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -14.0
 offset_top = -14.0
+grow_horizontal = 0
+grow_vertical = 0
 color = Color(0.8, 0.8, 0.8, 0.8)
 script = ExtResource("4_resize")
 target_window = NodePath("..")
@@ -249,6 +251,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -14.0
 offset_top = -14.0
+grow_horizontal = 0
+grow_vertical = 0
 color = Color(0.8, 0.8, 0.8, 0.8)
 script = ExtResource("4_resize")
 target_window = NodePath("..")
@@ -331,6 +335,10 @@ text = "ATK: 0"
 layout_mode = 2
 text = "DEF: 0"
 
+[node name="WeaponLabel" type="Label" parent="StatsWindow/Content/StatsVBox" unique_id=1205070638]
+layout_mode = 2
+text = "Weapon: None"
+
 [node name="ResizeHandle" type="ColorRect" parent="StatsWindow" unique_id=1596568055 node_paths=PackedStringArray("target_window")]
 layout_mode = 1
 anchors_preset = 3
@@ -340,6 +348,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -14.0
 offset_top = -14.0
+grow_horizontal = 0
+grow_vertical = 0
 color = Color(0.8, 0.8, 0.8, 0.8)
 script = ExtResource("4_resize")
 target_window = NodePath("..")
@@ -428,6 +438,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -14.0
 offset_top = -14.0
+grow_horizontal = 0
+grow_vertical = 0
 color = Color(0.8, 0.8, 0.8, 0.8)
 script = ExtResource("4_resize")
 target_window = NodePath("..")

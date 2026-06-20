@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://b0bmam31ogpc5" path="res://assets/tilesets/House_Interior.png" id="2_vwxbd"]
 [ext_resource type="PackedScene" uid="uid://w2r7h6kd46t3" path="res://scenes/player.tscn" id="3_0daw6"]
 [ext_resource type="PackedScene" uid="uid://c4jpgv4k5cpig" path="res://scenes/object/exit_house.tscn" id="4_ogqc2"]
+[ext_resource type="PackedScene" uid="uid://d08yh3bb4r7j4" path="res://scenes/minimap_ui.tscn" id="4_vwxbd"]
 [ext_resource type="PackedScene" uid="uid://2qf6qd4ujpaa" path="res://scenes/npc/npc_2.tscn" id="5_d203p"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2eebu"]
@@ -613,6 +614,8 @@ limit_top = -190
 limit_right = 421
 limit_bottom = 363
 limit_smoothed = true
+
+[node name="MinimapUI" parent="Entities/Player" unique_id=269782399 instance=ExtResource("4_vwxbd")]
 
 [node name="ExitHouse" parent="Entities" unique_id=1624126511 instance=ExtResource("4_ogqc2")]
 position = Vector2(111, 128)

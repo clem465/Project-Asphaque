@@ -34,6 +34,7 @@ extends CanvasLayer
 @onready var hp_bar: ProgressBar = $StatsWindow/Content/StatsVBox/HpBar
 @onready var atk_label: Label = $StatsWindow/Content/StatsVBox/AtkLabel
 @onready var def_label: Label = $StatsWindow/Content/StatsVBox/DefLabel
+@onready var weapon_label: Label = $StatsWindow/Content/StatsVBox/WeaponLabel
 @onready var attack_toggle_button: Button = $ActionsWindow/Content/ActionsVBox/Action1
 @onready var item_slot_toggle_button: Button = $ActionsWindow/Content/ActionsVBox/Action2
 @onready var minimap_title_label: Label = $MinimapWindow/TitleBar/Header/TitleLabel
@@ -433,7 +434,16 @@ func _refresh_inventory_items_ui() -> void:
 
 		var item_label: Label = Label.new()
 		item_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		item_label.text = "%s x%d" % [item_name, count]
+		var text := "%s x%d" % [item_name, count]
+
+		if GameState.equipped_weapon == item_id:
+			if _locale_manager:
+				text += " " + _locale_manager.tr_key("ui.equipped")
+			else:
+				text += " EQUIPPED"
+
+		item_label.text = text
+		
 		row.add_child(item_label)
 
 		var slot_button: Button = Button.new()
@@ -446,10 +456,17 @@ func _refresh_inventory_items_ui() -> void:
 		row.add_child(slot_button)
 
 		var use_button: Button = Button.new()
+		
+		var category := String(
+					GameState.item_definitions[item_id].get("category", "")
+				)
+
 		if _locale_manager and _locale_manager.has_method("tr_key"):
-			use_button.text = _locale_manager.tr_key("ui.use")
-		else:
-			use_button.text = "Use"
+			if category == "weapon":
+				use_button.text = _locale_manager.tr_key("ui.equip")
+			else:
+				use_button.text = _locale_manager.tr_key("ui.use")
+				
 		use_button.focus_mode = Control.FOCUS_NONE
 		use_button.pressed.connect(_on_inventory_use_pressed.bind(item_id))
 		row.add_child(use_button)
@@ -496,12 +513,30 @@ func _on_inventory_use_pressed(item_id: String) -> void:
 	if player == null:
 		return
 
-	if GameState.has_method("use_item"):
-		GameState.use_item(item_id, player)
-		_last_inventory_signature = "__dirty__"
+	if not GameState.item_definitions.has(item_id):
+		return
+
+	var item_data: Dictionary = GameState.item_definitions[item_id]
+	var category: String = String(item_data.get("category", ""))
+
+	match category:
+
+		"weapon":
+			GameState.equip_weapon(item_id)
+			print("Arme équipée :", item_id)
+
+		"consumable":
+			if GameState.has_method("use_item"):
+				GameState.use_item(item_id, player)
+
+		_:
+			print("Catégorie inconnue :", category)
+
+	_last_inventory_signature = "__dirty__"
 
 func _update_player_panels() -> void:
 	var coins: int = int(GameState.gold)
+
 	if inventory_placeholder:
 		if _locale_manager and _locale_manager.has_method("tr_key"):
 			inventory_placeholder.text = _locale_manager.tr_key("ui.coins", {"count": coins})
@@ -514,8 +549,15 @@ func _update_player_panels() -> void:
 
 	var current_hp: int = _read_player_int(player, "get_current_health", "health", 0)
 	var max_hp: int = max(1, _read_player_int(player, "get_max_health", "max_health", 1))
-	var atk: int = _read_player_int(player, "get_attack_value", "attack_damage", 0)
-	var defense: int = _read_player_int(player, "get_defense_value", "defense", 0)
+
+	var base_atk: int = _read_player_int(player, "get_attack_value", "attack_damage", 0)
+	var base_def: int = _read_player_int(player, "get_defense_value", "defense", 0)
+
+	var weapon_atk := GameState.get_weapon_attack()
+	var weapon_def := GameState.get_weapon_defense()
+
+	var total_atk := base_atk + weapon_atk
+	var total_def := base_def + weapon_def
 
 	if hp_label:
 		if _locale_manager and _locale_manager.has_method("tr_key"):
@@ -528,16 +570,30 @@ func _update_player_panels() -> void:
 		hp_bar.value = clamp(current_hp, 0, max_hp)
 
 	if atk_label:
-		if _locale_manager and _locale_manager.has_method("tr_key"):
-			atk_label.text = _locale_manager.tr_key("ui.atk", {"value": atk})
-		else:
-			atk_label.text = "ATK: %d" % atk
+		atk_label.text = _locale_manager.tr_key("ui.atk") + ": %d (+%d)" % [total_atk, weapon_atk]
 
 	if def_label:
-		if _locale_manager and _locale_manager.has_method("tr_key"):
-			def_label.text = _locale_manager.tr_key("ui.def", {"value": defense})
+		def_label.text = "DEF: %d (+%d)" % [total_def, weapon_def]
+
+	# Affichage de l'arme équipée
+	if weapon_label:
+		var weapon_name := String(_locale_manager.tr_key("ui.none") if _locale_manager else "None")
+		if GameState.equipped_weapon != "":
+			if GameState.item_definitions.has(GameState.equipped_weapon):
+				weapon_name = String(
+					GameState.item_definitions[GameState.equipped_weapon].get(
+						"display_name",
+						GameState.equipped_weapon
+					)
+				)
+
+		if _locale_manager:
+			weapon_label.text = "%s: %s" % [
+				_locale_manager.tr_key("ui.weapon"),
+				weapon_name
+			]
 		else:
-			def_label.text = "DEF: %d" % defense
+			weapon_label.text = "Weapon: %s" % weapon_name
 
 	_sync_attack_toggle_from_player()
 

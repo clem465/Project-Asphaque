@@ -62,10 +62,12 @@ var player_came_from: String = "village"
 var item_definitions := {
 	"healing_potion": {
 		"display_name": "Healing Potion",
+		"category": "consumable",
 		"heal_amount": 20,
 	},
 	"speed_potion": {
 		"display_name": "Speed Boost Potion",
+		"category": "consumable",
 		"speed_multiplier": 1.6,
 	},
 	"iron_sword": {

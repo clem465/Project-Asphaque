@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://cpimbmtlnwnku" path="res://assets/tilesets/tilemap_packed.png" id="1_q5nrs"]
 [ext_resource type="Texture2D" uid="uid://cl4koipcd5lu6" path="res://assets/tilesets/village_tileset_16.png" id="2_sq3sw"]
 [ext_resource type="PackedScene" uid="uid://w2r7h6kd46t3" path="res://scenes/player.tscn" id="3_dnl03"]
+[ext_resource type="PackedScene" uid="uid://d08yh3bb4r7j4" path="res://scenes/minimap_ui.tscn" id="4_la0qa"]
 [ext_resource type="PackedScene" uid="uid://dr0jm6fnwyjnt" path="res://scenes/npc/npc_1.tscn" id="4_sq3sw"]
 [ext_resource type="PackedScene" uid="uid://2qf6qd4ujpaa" path="res://scenes/npc/npc_2.tscn" id="5_0btfk"]
 [ext_resource type="PackedScene" uid="uid://4xiweimjtwf" path="res://scenes/object/enter_house.tscn" id="7_la0qa"]
@@ -377,6 +378,8 @@ layer_4/z_index = 4
 [node name="Player" parent="." unique_id=899918847 instance=ExtResource("3_dnl03")]
 z_index = 1
 position = Vector2(127, 65)
+
+[node name="MinimapUI" parent="Player" unique_id=269782399 instance=ExtResource("4_la0qa")]
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=1454367891]
 position = Vector2(-13.861389, -3.9604187)
