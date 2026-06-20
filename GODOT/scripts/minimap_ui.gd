@@ -570,7 +570,7 @@ func _update_player_panels() -> void:
 		hp_bar.value = clamp(current_hp, 0, max_hp)
 
 	if atk_label:
-		atk_label.text = _locale_manager.tr_key("ui.atk") + ": %d (+%d)" % [total_atk, weapon_atk]
+		atk_label.text = _locale_manager.tr_key("ui.atk_a") + ": %d (+%d)" % [total_atk, weapon_atk]
 
 	if def_label:
 		def_label.text = "DEF: %d (+%d)" % [total_def, weapon_def]
