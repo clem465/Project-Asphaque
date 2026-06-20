@@ -6,6 +6,8 @@ signal buy_item(item_name: String, price: int)
 @onready var item_list: ItemList = $Panel/VBoxContainer/ItemList
 @onready var close_button: Button = $Panel/VBoxContainer/Fermer
 
+@onready var sound_pay = $AudioStreamPlayer2D
+
 var shop_items: Array[Dictionary] = [
 	{
 		"id": "iron_sword",
@@ -160,7 +162,8 @@ func _on_item_list_item_activated(index: int) -> void:
 	if int(GameState.gold) < item_price:
 		title_label.text = _locale_manager.tr_key("ui.Not_enough_coins") + "(%d " + _locale_manager.tr_key("ui.needed") + ")" % item_price
 		return
-
+	
+	sound_pay.play()
 	GameState.gold -= item_price
 	GameState.add_item(item_id)
 	emit_signal("buy_item", item_id, item_price)

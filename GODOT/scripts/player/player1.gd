@@ -13,8 +13,11 @@ extends CharacterBody2D
 # -------------------------
 # STATS
 # -------------------------
+var weapon_atk := GameState.get_weapon_attack()
+var weapon_def := GameState.get_weapon_defense()
+
 @export var max_health := 25
-@export var attack := 10
+@export var attack := 5
 @export var defense := 3
 
 var health := 0
@@ -37,6 +40,9 @@ var already_hit: Array = []
 # -------------------------
 func _ready() -> void:
 	add_to_group("player")
+	
+	attack += weapon_atk
+	defense += weapon_def
 
 	health = max_health
 	_base_speed = speed
@@ -328,11 +334,33 @@ func show_floating_text(text: String):
 # -------------------------
 # MORT
 # -------------------------
-func die():
-	print("­ƒÆÇ Player mort")
+func die() -> void:
+	print("💀 Player mort")
 
-	# ­ƒöü restaurer les coins
+	set_physics_process(false)
+	set_process_input(false)
+	set_process_unhandled_input(false)
+
+	velocity = Vector2.ZERO
+
+	if animated_sprite:
+		animated_sprite.stop()
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+
+	# disparition progressive
+	tween.tween_property(self, "modulate:a", 0.0, 1.0)
+
+	await tween.finished
+
+	# restaurer les coins
 	GameState.restore_gold()
+	
+	MusicManager.pop_music()
 
-	# ­ƒöä retour village
-	get_tree().change_scene_to_file("res://maps/village.tscn")
+	# retour village
+	get_tree().call_deferred(
+		"change_scene_to_file",
+		"res://maps/village.tscn"
+	)

@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://bvstecdyjgao7"]
+
+[ext_resource type="Script" uid="uid://723uowghkfqg" path="res://scripts/MusicManager.gd" id="1_k17rw"]
+
+[node name="MusicManager" type="Node2D" unique_id=420967261]
+script = ExtResource("1_k17rw")
+
+[node name="MusicPlayer" type="AudioStreamPlayer2D" parent="." unique_id=504393728]
+autoplay = true

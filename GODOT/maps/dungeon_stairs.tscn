@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dwy7akpk2fvb0"]
 
 [ext_resource type="Texture2D" uid="uid://by76coc8sptpo" path="res://assets/object/pngtree-old-wooden-door-of-castle-png-image_12516559.png" id="1_door_tex"]
-[ext_resource type="Script" path="res://scripts/map/dungeon_stairs.gd" id="2_stairs_script"]
+[ext_resource type="Script" uid="uid://djsuwigb7csh4" path="res://scripts/maps/dungeon_stairs.gd" id="2_stairs_script"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_stairs"]
 atlas = ExtResource("1_door_tex")

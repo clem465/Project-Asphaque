@@ -13,6 +13,10 @@ extends CharacterBody2D
 @onready var hitbox: Area2D = $Hitbox
 @onready var health_bar: ProgressBar = $HealthBar
 
+@onready var music_atk = preload("res://assets/audio/music/mrclaps-this-heavy-metal-492569.mp3")
+@onready var sound_atk : AudioStreamPlayer2D = $AudioStreamPlayer2D
+
+
 # -------------------------
 # STATS
 # -------------------------
@@ -139,7 +143,9 @@ func _attack():
 	velocity = Vector2.ZERO
 
 	anim.play("attack_" + last_dir)
-
+	
+	sound_atk.play()
+	
 	await get_tree().create_timer(0.35).timeout
 
 	if is_dead:
@@ -391,3 +397,13 @@ func _get_minimap_player_ref() -> Node2D:
 		minimap_player_ref = candidate
 
 	return minimap_player_ref
+
+
+func _on_music_player_body_entered(body) -> void:
+	if body.is_in_group("player"):
+		MusicManager.push_music(music_atk)
+
+
+func _on_music_player_body_exited(body) -> void:
+	if body.is_in_group("player"):
+		MusicManager.pop_music()

@@ -6,6 +6,8 @@ signal buy_item(item_name: String, price: int)
 @onready var item_list: ItemList = $Panel/VBoxContainer/ItemList
 @onready var close_button: Button = $Panel/VBoxContainer/Fermer
 
+@onready var sound_pay = $AudioStreamPlayer2D
+
 var shop_items: Array[Dictionary] = [
 	{"id": "healing_potion","category": "consumable", "name": "Healing Potion", "price": 25},
 	{"id": "speed_potion","category": "consumable", "name": "Speed Boost Potion", "price": 40}
@@ -113,7 +115,8 @@ func _on_item_list_item_activated(index: int) -> void:
 		else:
 			title_label.text = "Not enough gold (%d needed)" % item_price
 		return
-
+	
+	sound_pay.play()
 	GameState.gold -= item_price
 	GameState.add_item(item_id)
 	emit_signal("buy_item", item_id, item_price)

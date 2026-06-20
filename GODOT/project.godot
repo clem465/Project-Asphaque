@@ -18,7 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 DialogueManager="*uid://c3rodes2l3gxb"
-Music="*uid://bvstecdyjgao7"
+MusicManager="*uid://bvstecdyjgao7"
 GameState="*uid://cragcubd7svl6"
 LocaleManager="res://scripts/locale_manager.gd"
 

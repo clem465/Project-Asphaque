@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://wi8kq04pwaem"]
 
 [ext_resource type="Script" uid="uid://dur00niw8v4mv" path="res://scripts/npc/UI/Shop.gd" id="1_cs7jk"]
+[ext_resource type="AudioStream" uid="uid://gydl48gl3hsv" path="res://assets/audio/sounds/applepay.mp3" id="2_6dya7"]
 
 [node name="CanvasLayer" type="CanvasLayer" unique_id=312043361]
 layer = 0
@@ -44,5 +45,8 @@ size_flags_vertical = 3
 [node name="Fermer" type="Button" parent="Panel/VBoxContainer" unique_id=683822488]
 layout_mode = 2
 text = "Close Shop"
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=71662297]
+stream = ExtResource("2_6dya7")
 
 [connection signal="item_selected" from="Panel/VBoxContainer/ItemList" to="." method="_on_item_list_item_activated"]

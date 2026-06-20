@@ -448,18 +448,20 @@ func _refresh_inventory_items_ui() -> void:
 
 		var slot_button: Button = Button.new()
 		slot_button.focus_mode = Control.FOCUS_NONE
-		if _locale_manager and _locale_manager.has_method("tr_key"):
-			slot_button.text = _locale_manager.tr_key("ui.slot_on" if assigned_item == item_id else "ui.slot_off")
-		else:
-			slot_button.text = "R: ON" if assigned_item == item_id else "R: OFF"
-		slot_button.pressed.connect(_on_inventory_slot_toggle_pressed.bind(item_id))
-		row.add_child(slot_button)
-
-		var use_button: Button = Button.new()
 		
 		var category := String(
 					GameState.item_definitions[item_id].get("category", "")
 				)
+		
+		if category != "weapon":
+			if _locale_manager and _locale_manager.has_method("tr_key"):
+				slot_button.text = _locale_manager.tr_key("ui.slot_on" if assigned_item == item_id else "ui.slot_off")
+			else:
+				slot_button.text = "R: ON" if assigned_item == item_id else "R: OFF"
+			slot_button.pressed.connect(_on_inventory_slot_toggle_pressed.bind(item_id))
+		row.add_child(slot_button)
+
+		var use_button: Button = Button.new()
 
 		if _locale_manager and _locale_manager.has_method("tr_key"):
 			if category == "weapon":
