@@ -9,6 +9,7 @@ extends CharacterBody2D
 @onready var coin_sound: AudioStreamPlayer2D = $CoinSound  
 @onready var sword_sound : AudioStreamPlayer2D = $SwingSword
 @onready var damage_sound : AudioStreamPlayer2D = $TakeDamage
+@onready var death_sound : AudioStreamPlayer2D = $Death
 
 # -------------------------
 # STATS
@@ -278,7 +279,8 @@ func add_coin(amount: int):
 		coin_sound.play()
 
 	# Ô£¿ texte flottant
-	show_floating_text("+%d 🪙" % amount)
+	var coin_icon = preload("res://assets/object/PNG/Gold/Gold_1.png")
+	show_floating_text(amount, coin_icon)
 
 func set_attack_enabled(enabled: bool) -> void:
 	attack_enabled = enabled
@@ -308,34 +310,46 @@ func get_defense_value() -> int:
 	return defense
 
 # -------------------------
-# Affiche le nombre de pi├¿ce gagn├®
+# Affiche le nombre de piece gagnee
 # -------------------------
-func show_floating_text(text: String):
-	var label = Label.new()
-	label.text = text
+func show_floating_text(value: int, icon: Texture2D = null):
+	var container := HBoxContainer.new()
+	add_child(container)
 
-	# Style
-	label.modulate = Color(1, 0.9, 0.2) # jaune
+	# Position
+	container.position = Vector2(0, -20)
+
+	# TEXT
+	var label := Label.new()
+	label.text = "+%d" % value
+	label.modulate = Color(1, 0.9, 0.2)
 	label.add_theme_font_size_override("font_size", 16)
+	container.add_child(label)
 
-	add_child(label)
+	# ICON
+	if icon:
+		var texture_rect := TextureRect.new()
+		texture_rect.texture = icon
+		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		texture_rect.custom_minimum_size = Vector2(14, 14)
+		container.add_child(texture_rect)
 
-	# Position au-dessus du joueur
-	label.position = Vector2(0, -20)
-
-	# Animation
-	var tween = create_tween()
-	tween.tween_property(label, "position:y", label.position.y - 30, 0.6)
-	tween.tween_property(label, "modulate:a", 0.0, 0.6)
+	# ANIMATION
+	var tween := create_tween()
+	tween.tween_property(container, "position:y", container.position.y - 30, 0.6)
+	tween.parallel().tween_property(container, "modulate:a", 0.0, 0.6)
 
 	await tween.finished
-	label.queue_free()
+	container.queue_free()
 
 # -------------------------
 # MORT
 # -------------------------
 func die() -> void:
-	print("💀 Player mort")
+	print("Player mort")
+	
+	death_sound.play()
 
 	set_physics_process(false)
 	set_process_input(false)
@@ -353,7 +367,7 @@ func die() -> void:
 	tween.tween_property(self, "modulate:a", 0.0, 1.0)
 
 	await tween.finished
-
+	
 	# restaurer les coins
 	GameState.restore_gold()
 	

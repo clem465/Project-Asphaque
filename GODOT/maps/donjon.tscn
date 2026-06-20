@@ -956,6 +956,10 @@ script = ExtResource("2_6dfai")
 
 [node name="Player1" parent="." unique_id=899918847 instance=ExtResource("3_mctgr")]
 position = Vector2(635, 468)
+speed = 80.0
+max_health = 25
+attack = 5
+defense = 3
 
 [node name="Camera2D" type="Camera2D" parent="Player1" unique_id=597286282]
 position = Vector2(-1.5258789e-05, 5.940613)

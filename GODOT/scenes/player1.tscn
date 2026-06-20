@@ -16,6 +16,7 @@
 [ext_resource type="AudioStream" uid="uid://d0ekd86nraqyi" path="res://assets/audio/sounds/freesound_community-sword-sound-2-36274.mp3" id="14_qrjn2"]
 [ext_resource type="AudioStream" uid="uid://bf7ud0ofh78y1" path="res://assets/audio/sounds/object/super-mario-coin-sound.mp3" id="14_tvatu"]
 [ext_resource type="AudioStream" uid="uid://doxpbhuc0bxlm" path="res://assets/audio/sounds/undertale-damage-taken.mp3" id="16_tsh6u"]
+[ext_resource type="AudioStream" uid="uid://b671hf6v5k0ji" path="res://assets/audio/sounds/drummusiclooper5000-lose-sfx-365579.mp3" id="17_do31k"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tsh6u"]
 atlas = ExtResource("1_16ml7")
@@ -771,6 +772,10 @@ scale = Vector2(0.505, 0.505)
 collision_layer = 2
 collision_mask = 25
 script = ExtResource("1_mod63")
+speed = null
+max_health = null
+attack = null
+defense = null
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=218171934]
 sprite_frames = SubResource("SpriteFrames_y4r1p")
@@ -813,5 +818,9 @@ stream = ExtResource("14_tvatu")
 
 [node name="TakeDamage" type="AudioStreamPlayer2D" parent="." unique_id=729521650]
 stream = ExtResource("16_tsh6u")
+
+[node name="Death" type="AudioStreamPlayer2D" parent="." unique_id=359658509]
+stream = ExtResource("17_do31k")
+parameters/looping = false
 
 [connection signal="body_entered" from="Direction/Hitbox" to="." method="_on_hitbox_body_entered"]
