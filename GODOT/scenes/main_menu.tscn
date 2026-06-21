@@ -107,6 +107,14 @@ theme_override_font_sizes/font_size = 27
 alignment = 1
 secret = true
 
+[node name="rgpd_checkbox" type="CheckBox" parent="VBoxContainer" unique_id=987654321]
+layout_mode = 2
+visible = false
+theme_override_colors/font_color = Color(0.7882353, 0.63529414, 0.18431373, 1)
+theme_override_fonts/font = ExtResource("2_ekxnf")
+theme_override_font_sizes/font_size = 18
+text = "I accept the privacy policy"
+
 [node name="Spacer" type="Control" parent="VBoxContainer" unique_id=1827364510]
 layout_mode = 2
 
