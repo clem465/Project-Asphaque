@@ -81,6 +81,9 @@ var _settings_music_slider: HSlider = null
 var _settings_master_volume: float = 100.0
 var _settings_music_volume: float = 100.0
 var _is_loading_settings: bool = false
+var _settings_dragging: bool = false
+var _settings_drag_offset: Vector2 = Vector2.ZERO
+var _settings_header: Control = null
 
 func _ready() -> void:
 	_disable_button_keyboard_focus(self)
@@ -165,6 +168,8 @@ func _ready() -> void:
 	call_deferred("_setup_mobile_controls")
 	_load_audio_settings()
 	_apply_audio_settings()
+	call_deferred("_init_settings_drag")
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.echo:
@@ -1288,3 +1293,29 @@ func _find_all_tilemaps(node: Node) -> Array:
 	for child in node.get_children():
 		result.append_array(_find_all_tilemaps(child))
 	return result
+
+func _init_settings_drag() -> void:
+	if _settings_window == null:
+		return
+
+	# récupère la barre de titre créée dynamiquement
+	var header = _settings_window.get_node("TitleBar/Header")
+	if header:
+		_settings_header = header
+		header.mouse_filter = Control.MOUSE_FILTER_STOP
+		header.gui_input.connect(_on_settings_header_input)
+
+
+func _on_settings_header_input(event: InputEvent) -> void:
+	if _settings_window == null:
+		return
+
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_settings_dragging = true
+			_settings_drag_offset = _settings_window.global_position - get_viewport().get_mouse_position()
+		else:
+			_settings_dragging = false
+
+	elif event is InputEventMouseMotion and _settings_dragging:
+		_settings_window.global_position = get_viewport().get_mouse_position() + _settings_drag_offset
