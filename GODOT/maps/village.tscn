@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://w2r7h6kd46t3" path="res://scenes/player.tscn" id="3_dnl03"]
 [ext_resource type="PackedScene" uid="uid://d08yh3bb4r7j4" path="res://scenes/minimap_ui.tscn" id="4_la0qa"]
 [ext_resource type="PackedScene" uid="uid://dr0jm6fnwyjnt" path="res://scenes/npc/npc_1.tscn" id="4_sq3sw"]
-[ext_resource type="PackedScene" uid="uid://2qf6qd4ujpaa" path="res://scenes/npc/npc_2.tscn" id="5_0btfk"]
 [ext_resource type="PackedScene" uid="uid://4xiweimjtwf" path="res://scenes/object/enter_house.tscn" id="7_la0qa"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0btfk"]
@@ -396,9 +395,6 @@ limit_smoothed = true
 [node name="npc1" parent="." unique_id=359243694 instance=ExtResource("4_sq3sw")]
 position = Vector2(120, -30)
 scale = Vector2(0.5, 0.5)
-
-[node name="npc2" parent="." unique_id=2039283005 instance=ExtResource("5_0btfk")]
-position = Vector2(156, 87)
 
 [node name="EnterHouse" parent="." unique_id=850861033 instance=ExtResource("7_la0qa")]
 position = Vector2(-17, 83)

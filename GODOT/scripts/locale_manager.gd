@@ -51,6 +51,7 @@ var _translations := {
 		"ui.close_shop": "Fermer la boutique",
 		"ui.atk_a": "ATQ",
 		"ui.shop": "Magasin",
+		"ui.12_carac": "Le mot de passe doit contenir au moins 12 caractères.",
 	},
 	"en": {
 		"ui.email": "Email",
@@ -96,6 +97,7 @@ var _translations := {
 		"ui.close_shop": "Close Shop",
 		"ui.atk_a": "ATK",
 		"ui.shop": "Shop",
+		"ui.12_carac": "The password must be at least 12 characters.",
 	},
 	"es": {
 		"ui.email": "Email",
@@ -139,6 +141,7 @@ var _translations := {
 		"ui.close_shop": "cerrar",
 		"ui.atk_a": "ATK",
 		"ui.shop": "Tienda",
+		"ui.12_carac": "La contraseña debe tener al menos 12 caracteres.",
 	},
 	"ja": {
 		"ui.email": "Eメール",
@@ -182,6 +185,7 @@ var _translations := {
 		"ui.close_shop": "閉店",
 		"ui.atk_a": "ATK",
 		"ui.shop": "ショップ",
+		"ui.12_carac": "パスワードは少なくとも 12 文字である必要があります。",
 		
 	}
 }

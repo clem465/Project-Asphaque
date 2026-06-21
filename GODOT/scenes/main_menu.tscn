@@ -156,6 +156,7 @@ offset_left = -52.0
 offset_top = 8.0
 offset_right = -12.0
 offset_bottom = 32.0
+grow_horizontal = 0
 text = "EN"
 
 [connection signal="pressed" from="VBoxContainer/TopCenter/HBoxContainer/login_button" to="." method="_on_login_pressed"]

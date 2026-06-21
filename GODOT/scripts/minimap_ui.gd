@@ -416,7 +416,20 @@ func _on_lang_toggle_pressed() -> void:
 		return
 
 	var current: String = String(_locale_manager.get_locale())
-	var next: String = "en" if current == "fr" else "fr"
+	var next: String
+
+	match current:
+		"fr":
+			next = "en"
+		"en":
+			next = "es"
+		"es":
+			next = "ja"
+		"ja":
+			next = "fr"
+		_:
+			next = "fr"
+
 	_locale_manager.set_locale(next)
 
 func _update_lang_toggle_label() -> void:
@@ -426,7 +439,18 @@ func _update_lang_toggle_label() -> void:
 		return
 
 	var current: String = String(_locale_manager.get_locale())
-	lang_toggle_button.text = "EN" if current == "fr" else "FR"
+
+	match current:
+		"fr":
+			lang_toggle_button.text = "FR"
+		"en":
+			lang_toggle_button.text = "EN"
+		"es":
+			lang_toggle_button.text = "ES"
+		"ja":
+			lang_toggle_button.text = "JA"
+		_:
+			lang_toggle_button.text = "?"
 
 func _disable_button_keyboard_focus(node: Node) -> void:
 	if node is Button:

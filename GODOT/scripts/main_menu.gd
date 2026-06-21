@@ -170,6 +170,11 @@ func _on_submit_pressed():
 	if is_requesting:
 		return
 
+# Vérification du mot de passe lors de l'inscription
+	if not is_login and password_input.text.length() < 12:
+		error_label.text = _locale_manager.tr_key("ui.12_carac")
+		return
+
 	is_requesting = true
 
 	var body = {
@@ -179,13 +184,18 @@ func _on_submit_pressed():
 	var endpoint = api_login
 
 	if is_login:
-		print("➡️ LOGIN:", JSON.stringify(body))
+		print("LOGIN:", JSON.stringify(body))
 	else:
 		body["username"] = username_input.text
 		endpoint = api_register
-		print("➡️ REGISTER:", JSON.stringify(body))
+		print("REGISTER:", JSON.stringify(body))
 
-	http.request(endpoint, ["Content-Type: application/json"], HTTPClient.METHOD_POST, JSON.stringify(body))
+	http.request(
+		endpoint,
+		["Content-Type: application/json"],
+		HTTPClient.METHOD_POST,
+		JSON.stringify(body)
+	)
 
 func _on_lang_toggle_pressed() -> void:
 	if not _locale_manager:
@@ -194,7 +204,20 @@ func _on_lang_toggle_pressed() -> void:
 		return
 
 	var current: String = String(_locale_manager.get_locale())
-	var next: String = "en" if current == "fr" else "fr"
+	var next: String
+
+	match current:
+		"fr":
+			next = "en"
+		"en":
+			next = "es"
+		"es":
+			next = "ja"
+		"ja":
+			next = "fr"
+		_:
+			next = "fr"
+
 	_locale_manager.set_locale(next)
 
 func _update_lang_toggle_label() -> void:
@@ -204,7 +227,18 @@ func _update_lang_toggle_label() -> void:
 		return
 
 	var current: String = String(_locale_manager.get_locale())
-	lang_toggle_button.text = "EN" if current == "fr" else "FR"
+
+	match current:
+		"fr":
+			lang_toggle_button.text = "FR"
+		"en":
+			lang_toggle_button.text = "EN"
+		"es":
+			lang_toggle_button.text = "ES"
+		"ja":
+			lang_toggle_button.text = "JA"
+		_:
+			lang_toggle_button.text = "?"
 
 
 # 🌐 RÉPONSE
