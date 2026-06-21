@@ -1,0 +1,19 @@
+~ start
+鍛冶屋: ようこそ冒険者！
+鍛冶屋: 十分な金があれば、必要なものはあります。
+鍛冶屋: 私の商品を見たいですか？
+
+- はい => open_shop
+- 無い => leave
+
+
+~ open_shop
+do GameState.choice = "yes"
+鍛冶屋: まあ、私が売らなければならないものを見てください！
+=> END
+
+
+~ leave
+do GameState.choice = "no"
+鍛冶屋: 残念ですね。..準備ができたら戻ってきてください。
+=> END

@@ -1,0 +1,15 @@
+~ start
+Theo: サラーム ロヤ！
+Theo: ダンジョンに入りたいですか？
+
+- はい => go_dungeon
+- 無い => stay
+
+~ go_dungeon
+do GameState.choice = "yes"
+Theo: がんばろう！
+=> END
+
+~ stay
+do GameState.choice = "no"
+=> END

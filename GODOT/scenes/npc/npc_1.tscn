@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://c06qbteqv8563" path="res://assets/npc/knight/_Idle.png" id="2_cs0kb"]
 [ext_resource type="PackedScene" uid="uid://dnm7kishggdbs" path="res://helpers/actionable_teleport.tscn" id="3_gwci6"]
+[ext_resource type="Script" uid="uid://d14hy0hgtmey5" path="res://scripts/npc/npc_1.gd" id="3_tmjxu"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tveaq"]
 atlas = ExtResource("2_cs0kb")
@@ -106,6 +107,7 @@ metadata/_edit_lock_ = true
 
 [node name="Actionable_teleport" parent="." unique_id=130623042 instance=ExtResource("3_gwci6")]
 position = Vector2(-2, -1)
+script = ExtResource("3_tmjxu")
 metadata/_edit_lock_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Actionable_teleport" unique_id=1177984130]

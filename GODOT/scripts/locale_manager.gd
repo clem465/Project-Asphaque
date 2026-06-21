@@ -142,6 +142,8 @@ var _translations := {
 		"ui.atk_a": "ATK",
 		"ui.shop": "Tienda",
 		"ui.12_carac": "La contraseña debe tener al menos 12 caracteres.",
+		"item.healing_potion": "Poción Curativa",
+		"item.speed_potion": "Poción de Velocidad",
 	},
 	"ja": {
 		"ui.email": "Eメール",
@@ -186,6 +188,8 @@ var _translations := {
 		"ui.atk_a": "ATK",
 		"ui.shop": "ショップ",
 		"ui.12_carac": "パスワードは少なくとも 12 文字である必要があります。",
+		"item.healing_potion": "治癒薬",
+		"item.speed_potion": "スピードポーション",
 		
 	}
 }

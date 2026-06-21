@@ -1,0 +1,19 @@
+~ start
+Herrero: ¡Bienvenido aventurero!
+Herrero: Tengo lo que necesitas si tienes suficiente oro.
+Herrero: ¿Quieres ver mis productos?
+
+- Sí => open_shop
+- No => leave
+
+
+~ open_shop
+do GameState.choice = "yes"
+Herrero: Muy bien, mira lo que tengo para vender!
+=> END
+
+
+~ leave
+do GameState.choice = "no"
+Herrero: Qué pena... vuelve cuando estés listo.
+=> END

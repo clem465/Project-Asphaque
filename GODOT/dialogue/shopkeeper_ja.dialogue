@@ -1,0 +1,19 @@
+~ start
+店主: ようこそ、冒険家！
+店主: 十分な金があれば、私はギアを持っています。
+店主: 私の商品を見たいですか？
+
+- はい => open_shop
+- 無い => leave
+
+
+~ open_shop
+do GameState.choice = "yes"
+店主: そうですね、私が売っているものを見てください！
+=> END
+
+
+~ leave
+do GameState.choice = "no"
+店主: 残念です。..準備ができたら戻ってきてください。
+=> END

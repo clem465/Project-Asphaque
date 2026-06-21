@@ -1,0 +1,46 @@
+~ start
+Lina: Hola aventurero.
+Lina: Los slimes están saliendo de la mazmorra y amenazando al pueblo.
+Lina: ¿Puedes eliminar 5 de ellos?
+
+- Sí, lo haré => accept
+- Ahora no => refuse
+
+
+~ accept
+do GameState.choice = "accept_quest"
+Lina: ¡Gracias! Vuelve después de que 5 slimes hayan sido derrotados.
+=> END
+
+
+~ refuse
+Lina: Muy bien. Vuelve cuando estés lista.
+=> END
+
+
+~ in_progress
+Lina: La misión está en progreso.
+Lina: Derrota más slimes y regresa.
+=> END
+
+
+~ ready_to_turn_in
+Lina: ¿Has terminado de limpiar la mazmorra?
+- Sí, misión cumplida => turn_in
+- Aún no => not_yet
+
+
+~ turn_in
+do GameState.choice = "turn_in_quest"
+Lina: ¡Excelente trabajo! Aquí está tu recompensa.
+=> END
+
+
+~ not_yet
+Lina: No hay problema, termina la misión y vuelve.
+=> END
+
+
+~ completed
+Lina: Gracias de nuevo por tu ayuda, el pueblo está más seguro ahora.
+=> END

@@ -1,0 +1,19 @@
+~ start
+Tendero: ¡Bienvenido, aventurero!
+Tendero: Tengo equipo si tienes suficiente oro.
+Tendero: ¿Quieres ver mis productos?
+
+- Sí => open_shop
+- No => leave
+
+
+~ open_shop
+do GameState.choice = "yes"
+Tendero: Muy bien, ¡echa un vistazo a lo que vendo!
+=> END
+
+
+~ leave
+do GameState.choice = "no"
+Tendero: Qué pena... vuelve cuando estés listo.
+=> END

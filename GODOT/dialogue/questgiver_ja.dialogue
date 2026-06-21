@@ -1,0 +1,46 @@
+~ start
+Lina: こんにちは、冒険家。
+Lina: スライムが地下牢から出てきて村を脅かしています。
+Lina: 5 つ排除できますか？
+
+- はい、やります => accept
+- なく、現在 => refuse
+
+
+~ accept
+do GameState.choice = "accept_quest"
+Lina: ありがとう！5 つのスライムが倒された後、戻ってきてください。
+=> END
+
+
+~ refuse
+Lina: よし。準備ができたら戻ってきてください。
+=> END
+
+
+~ in_progress
+Lina: クエストは進行中です。
+Lina: もっとスライムを倒して戻ってきてください。
+=> END
+
+
+~ ready_to_turn_in
+Lina: ダンジョンの掃除は終わりましたか？
+- はい、ミッションは完了しました => turn_in
+- まだ => not_yet
+
+
+~ turn_in
+do GameState.choice = "turn_in_quest"
+Lina: 素晴らしい仕事ですね！これがあなたの報酬です。
+=> END
+
+
+~ not_yet
+Lina: 問題ありません。ミッションを終えて戻ってきてください。
+=> END
+
+
+~ completed
+Lina: 改めてご協力いただきありがとうございます。村はより安全になりました。
+=> END
