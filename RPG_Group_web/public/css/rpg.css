@@ -115,7 +115,7 @@ body {
     display: none;
     position: absolute;
     top: calc(100% + 6px);
-    right: 0;           /* aligné à droite */
+    right: 0;
     left: auto;
     min-width: 100%;
 
@@ -439,6 +439,128 @@ body {
 }
 
 /* =========================
+   FOOTER
+========================= */
+
+.rpg-footer {
+    margin-top: 40px;
+    border-top: 1px solid #333;
+    padding: 20px;
+    text-align: center;
+    color: #aaa;
+    font-size: 13px;
+}
+
+.rpg-footer-inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.rpg-footer-inner p {
+    margin: 0;
+}
+
+.rpg-footer-links a {
+    color: #C9A22F;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    cursor: pointer;
+}
+
+.rpg-footer-links a:hover {
+    color: #f5f5dc;
+    text-decoration: underline;
+}
+
+/* =========================
+   MODAL MENTIONS LÉGALES
+========================= */
+
+.mentions-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.mentions-modal.is-open {
+    display: flex;
+}
+
+.mentions-modal-content {
+    background: #252525;
+    border: 2px solid #C9A22F;
+    border-radius: 15px;
+    padding: 35px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    color: #f5f5dc;
+    line-height: 1.7;
+    box-shadow: 0 0 40px rgba(201, 162, 47, 0.2);
+    animation: fadeInModal 0.2s ease;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.mentions-modal-content h2 {
+    color: #C9A22F;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.mentions-modal-content h3 {
+    color: #C9A22F;
+    margin-top: 24px;
+    margin-bottom: 6px;
+    font-size: 15px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+}
+
+.mentions-modal-content p {
+    margin: 0 0 8px 0;
+    color: #ccc;
+    font-size: 13px;
+}
+
+.mentions-modal-content em {
+    color: #C9A22F;
+    font-style: normal;
+}
+
+.mentions-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    background: none;
+    border: none;
+    color: #C9A22F;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s ease;
+    padding: 0;
+}
+
+.mentions-close:hover {
+    color: #f5f5dc;
+}
+
+/* =========================
    RESPONSIVE
 ========================= */
 
@@ -485,6 +607,10 @@ body {
 
     .rpg-btn{
         width:100%;
+    }
+
+    .mentions-modal-content {
+        padding: 24px 18px;
     }
 
 }

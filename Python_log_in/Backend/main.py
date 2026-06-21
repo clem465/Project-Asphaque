@@ -1,5 +1,3 @@
-
-
 from fastapi import FastAPI, HTTPException, Request, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -76,6 +74,7 @@ def init_state_table():
 
 # --- STATE ENDPOINTS ---
 init_state_table()
+
 @app.get("/state")
 def get_state(user_id: int = Depends(get_current_user_id)):
     print(f"[API] GET /state for user_id={user_id}")
@@ -102,6 +101,10 @@ def get_state(user_id: int = Depends(get_current_user_id)):
 @app.post("/state")
 def post_state(state: StateModel, user_id: int = Depends(get_current_user_id)):
     print(f"[API] POST /state for user_id={user_id} with state={state.state}")
+
+    # --- RGPD : injection automatique de la date de dernière activité ---
+    state.state["last_seen"] = datetime.datetime.utcnow().isoformat()
+
     state_json = json.dumps(state.state)
     if USE_SQLITE_FALLBACK:
         conn = get_sqlite_db()

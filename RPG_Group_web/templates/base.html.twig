@@ -13,5 +13,79 @@
     </head>
     <body>
         {% block body %}{% endblock %}
+
+        <!-- ⚖️ FOOTER MENTIONS LÉGALES -->
+        <footer class="rpg-footer">
+            <div class="rpg-footer-inner">
+                <p>© 2025 Asphaque — Projet scolaire</p>
+                <nav class="rpg-footer-links">
+                    <a href="#" id="footer-mentions-link">Mentions légales &amp; Confidentialité</a>
+                </nav>
+            </div>
+        </footer>
+
+        <!-- MODAL MENTIONS LÉGALES -->
+        <div id="mentions-legales-modal" class="mentions-modal" role="dialog" aria-modal="true" aria-labelledby="mentions-title">
+            <div class="mentions-modal-content">
+                <button class="mentions-close" id="close-mentions" aria-label="Fermer">&times;</button>
+
+                <h2 id="mentions-title">⚖️ Mentions légales &amp; Politique de confidentialité</h2>
+
+                <h3>Responsable du traitement</h3>
+                <p>Asphaque est un projet développé dans le cadre d'une formation scolaire. Il n'a aucune vocation commerciale.</p>
+
+                <h3>Données collectées</h3>
+                <p>Lors de l'inscription, nous collectons uniquement : une adresse email, un pseudonyme et un mot de passe. Le mot de passe est haché et jamais stocké en clair. Aucune donnée sensible, aucun paiement et aucun tracking publicitaire ne sont collectés.</p>
+
+                <h3>Finalité du traitement</h3>
+                <p>Les données collectées sont utilisées exclusivement pour permettre la connexion au jeu et la sauvegarde de votre progression. Elles ne sont ni vendues, ni partagées avec des tiers.</p>
+
+                <h3>Durée de conservation</h3>
+                <p>Les données sont conservées tant que le compte est actif. Un champ <em>last_seen</em> est automatiquement mis à jour à chaque sauvegarde. Les comptes inactifs depuis plus de 6 mois sont susceptibles d'être supprimés.</p>
+
+                <h3>Vos droits (RGPD)</h3>
+                <p>Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits, contactez l'administrateur du projet.</p>
+
+                <h3>Cookies</h3>
+                <p>Ce site n'utilise pas de cookies de tracking ou publicitaires. Seules les données de session nécessaires au fonctionnement du jeu sont conservées temporairement.</p>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                var link  = document.getElementById('footer-mentions-link');
+                var modal = document.getElementById('mentions-legales-modal');
+                var close = document.getElementById('close-mentions');
+
+                if (!link || !modal || !close) return;
+
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    modal.classList.add('is-open');
+                    close.focus();
+                });
+
+                close.addEventListener('click', function () {
+                    modal.classList.remove('is-open');
+                    link.focus();
+                });
+
+                // Fermer en cliquant sur le fond
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        modal.classList.remove('is-open');
+                        link.focus();
+                    }
+                });
+
+                // Fermer avec Échap
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                        modal.classList.remove('is-open');
+                        link.focus();
+                    }
+                });
+            })();
+        </script>
     </body>
 </html>

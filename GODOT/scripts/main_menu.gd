@@ -14,6 +14,8 @@ extends Control
 @onready var submit_button: Button = $VBoxContainer/SubmitCenter/submit_button
 @onready var loader: TextureRect = $loader
 @onready var lang_toggle_button: Button = $LangToggleButton
+# ⚖️ RGPD — CheckBox à ajouter dans le .tscn sous VBoxContainer/rgpd_checkbox
+@onready var rgpd_checkbox: CheckBox = $VBoxContainer/rgpd_checkbox
 
 
 const DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
@@ -131,6 +133,11 @@ func _update_form_ui() -> void:
 		pseudo_label.visible = not is_login
 	if username_input:
 		username_input.visible = not is_login
+	# ⚖️ RGPD — visible uniquement en mode inscription
+	if rgpd_checkbox:
+		rgpd_checkbox.visible = not is_login
+		if is_login:
+			rgpd_checkbox.button_pressed = false
 	if login_button:
 		login_button.modulate = ACTIVE_BUTTON_COLOR if is_login else INACTIVE_BUTTON_COLOR
 	if register_button:
@@ -173,6 +180,11 @@ func _on_submit_pressed():
 # Vérification du mot de passe lors de l'inscription
 	if not is_login and password_input.text.length() < 12:
 		error_label.text = _locale_manager.tr_key("ui.12_carac")
+		return
+
+	# ⚖️ RGPD — vérification du consentement lors de l'inscription
+	if not is_login and rgpd_checkbox and not rgpd_checkbox.button_pressed:
+		error_label.text = _locale_manager.tr_key("ui.rgpd_required") if _locale_manager and _locale_manager.has_method("tr_key") else "You must accept the privacy policy to register."
 		return
 
 	is_requesting = true
