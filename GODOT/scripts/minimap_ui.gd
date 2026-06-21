@@ -963,7 +963,9 @@ func _update_player_panels() -> void:
 	if weapon_label:
 		var weapon_name := String(_locale_manager.tr_key("ui.none") if _locale_manager else "None")
 		if GameState.equipped_weapon != "":
-			if GameState.item_definitions.has(GameState.equipped_weapon):
+			if GameState.has_method("get_item_display_name"):
+				weapon_name = GameState.get_item_display_name(GameState.equipped_weapon)
+			elif GameState.item_definitions.has(GameState.equipped_weapon):
 				weapon_name = String(
 					GameState.item_definitions[GameState.equipped_weapon].get(
 						"display_name",
