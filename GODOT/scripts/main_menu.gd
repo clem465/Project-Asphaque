@@ -13,6 +13,8 @@ extends Control
 @onready var register_button: Button = $VBoxContainer/TopCenter/HBoxContainer/register_button
 @onready var submit_button: Button = $VBoxContainer/SubmitCenter/submit_button
 @onready var loader: TextureRect = $loader
+@onready var lang_toggle_button: Button = $LangToggleButton
+
 
 const DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
 const ACTIVE_BUTTON_COLOR: Color = Color(0.4, 0.7, 0.95, 1)
@@ -56,6 +58,9 @@ func _ready():
 		login_button.toggle_mode = true
 	if register_button:
 		register_button.toggle_mode = true
+	
+	if lang_toggle_button:
+		lang_toggle_button.pressed.connect(_on_lang_toggle_pressed)
 
 	_update_form_ui()
 
@@ -98,6 +103,7 @@ func _center_login_layout() -> void:
 
 func _on_locale_changed(_locale: String) -> void:
 	_apply_locale()
+	_update_lang_toggle_label()
 
 func _apply_locale() -> void:
 	if not _locale_manager:
@@ -116,6 +122,9 @@ func _apply_locale() -> void:
 		login_button.text = _locale_manager.tr_key("ui.login")
 	if register_button:
 		register_button.text = _locale_manager.tr_key("ui.register")
+	if submit_button:
+		submit_button.text = login_button.text if is_login else register_button.text
+	_update_lang_toggle_label()
 
 func _update_form_ui() -> void:
 	if pseudo_label:
@@ -177,6 +186,25 @@ func _on_submit_pressed():
 		print("➡️ REGISTER:", JSON.stringify(body))
 
 	http.request(endpoint, ["Content-Type: application/json"], HTTPClient.METHOD_POST, JSON.stringify(body))
+
+func _on_lang_toggle_pressed() -> void:
+	if not _locale_manager:
+		return
+	if not _locale_manager.has_method("get_locale") or not _locale_manager.has_method("set_locale"):
+		return
+
+	var current: String = String(_locale_manager.get_locale())
+	var next: String = "en" if current == "fr" else "fr"
+	_locale_manager.set_locale(next)
+
+func _update_lang_toggle_label() -> void:
+	if lang_toggle_button == null:
+		return
+	if not _locale_manager or not _locale_manager.has_method("get_locale"):
+		return
+
+	var current: String = String(_locale_manager.get_locale())
+	lang_toggle_button.text = "EN" if current == "fr" else "FR"
 
 
 # 🌐 RÉPONSE
